@@ -1,10 +1,7 @@
-from sqlalchemy.orm import Session
-from db.database import SessionLocal
+from app.db.session import SessionLocal
+from fastapi import Depends
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+async def get_db():
+    async with SessionLocal() as session:
+        yield session
