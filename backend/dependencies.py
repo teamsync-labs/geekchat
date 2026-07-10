@@ -1,5 +1,4 @@
-from app.db.session import SessionLocal
-from fastapi import Depends
+from db.session import SessionLocal
 
 
 async def get_db():

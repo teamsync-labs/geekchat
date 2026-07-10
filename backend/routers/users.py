@@ -1,8 +1,5 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from app.schemas.user import UserCreate
-from app.services.user_service import create_user
-from app.dependencies import get_db
+from fastapi import APIRouter
+from schemas.user import UserCreate
 from fastapi.responses import JSONResponse
 
 

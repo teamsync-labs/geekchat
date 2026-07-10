@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers.users import router as users_router
+from routers.users import router as users_router
 
 
 app = FastAPI(title='GeekChat API')
