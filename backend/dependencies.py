@@ -1,6 +1,6 @@
-from db.session import SessionLocal
+from db.session import AsyncSessionLocal
 
 
 async def get_db():
-    async with SessionLocal() as session:
+    async with AsyncSessionLocal() as session:
         yield session
