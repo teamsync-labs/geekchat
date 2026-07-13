@@ -39,46 +39,47 @@ docker compose up
 ```
 ## Запуск из виртуального окружения
 
-1. В Windows запустите командную оболочку cmd.exe или PowerShell, в Linux терминал
-2. В локальном репозитории перейдите в директорию приложения
-- OS Windows
+1. В Windows запустите командную оболочку cmd.exe или PowerShell, в Linux запустите терминал.
+<br><br>
+2. В локальном репозитории перейдите в директорию приложения:
+- OS Windows >
 ```
 cd .\geekchat\backend
 ```
-- OS Linux
+- OS Linux >
 ```
 cd ./geekchat/backend
 ```
-3. Создайте виртуальное окружение
-- OS Windows
+3. Создайте виртуальное окружение:
+- OS Windows >
 ```
 python -m venv venv
 ```
-- OS Linux
+- OS Linux >
 ```
 python3 -m venv venv
 ```
-4. Активируйте окружение
-- OS Windows
+4. Активируйте окружение:
+- OS Windows >
 ```
 .\venv\Scripts\activate
 ```
-- OS Linux
+- OS Linux >
 ```
 source venv/bin/activate
 ```
     После активации в командной строке появится префикс (venv) — это значит, что всё, что вы запускаете и устанавливаете, относится к окружению.
     Деактивировать можно командой: 'deactivate'
-5. Установите зависимости проекта
+5. Установите зависимости проекта:
 ```
 pip install -r requirements.txt
 ```
-6. Запустите сервер
+6. Запустите сервер:
 ```
 uvicorn main:app
 ```
-- После успешного запуска перейдите в браузере по ссылке [http://localhost:8000/health](http://localhost:8000/health)
+- После успешного запуска перейдите в браузере по ссылке: [http://localhost:8000/health](http://localhost:8000/health)
 ```
 Вы должны увидеть успешный статус !   Status: OK
 ```
-- Чтобы посмотреть спецификацию API, перейдите по ссылке [http://localhost:8000/docs](http://localhost:8000/docs)
+- Чтобы посмотреть спецификацию API, перейдите по ссылке: [http://localhost:8000/docs](http://localhost:8000/docs)
