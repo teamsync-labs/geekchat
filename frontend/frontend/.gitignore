@@ -1,0 +1,36 @@
+# --- Dependencies ---
+node_modules/
+
+# --- Build output ---
+dist/
+dist-ssr/
+build/
+out/
+.vite/
+*.local
+
+# --- Env (локальные; примеры — .env.example в репо) ---
+.env
+.env.*
+!.env.example
+
+# --- Test ---
+coverage/
+
+# --- TypeScript ---
+*.tsbuildinfo
+
+# --- ESLint / Prettier cache ---
+.eslintcache
+.prettiercache
+
+# --- Storybook (если подключат) ---
+storybook-static/
+
+# --- PWA / service worker build ---
+dev-dist/
+sw.js
+workbox-*.js
+
+# --- Vite / Vitest ---
+vitest.config.*.timestamp-*
