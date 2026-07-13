@@ -1,9 +1,21 @@
-import os
 from dotenv import load_dotenv
+from pydantic_settings import BaseSettings
+import os
 
 
 load_dotenv()
 
-DATABASE_URL = os.getenv('DATABASE_URL')
 
-#SECRET_KEY = os.getenv('SECRET_KEY')
+class Settings(BaseSettings):
+    API_TITLE: str = 'GeekChat API'
+    API_VERSION: str = '1.0.0'
+
+    BASE_URL: str = os.getenv('BASE_URL')
+
+    DATABASE_URL: str = os.getenv('DATABASE_URL')
+
+    class Config:
+        env_file = '.env'
+
+
+settings = Settings()
