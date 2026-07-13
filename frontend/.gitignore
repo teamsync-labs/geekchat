@@ -1,36 +1,24 @@
-# --- Dependencies ---
-node_modules/
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# --- Build output ---
-dist/
-dist-ssr/
-build/
-out/
-.vite/
+node_modules
+dist
+dist-ssr
 *.local
 
-# --- Env (локальные; примеры — .env.example в репо) ---
-.env
-.env.*
-!.env.example
-
-# --- Test ---
-coverage/
-
-# --- TypeScript ---
-*.tsbuildinfo
-
-# --- ESLint / Prettier cache ---
-.eslintcache
-.prettiercache
-
-# --- Storybook (если подключат) ---
-storybook-static/
-
-# --- PWA / service worker build ---
-dev-dist/
-sw.js
-workbox-*.js
-
-# --- Vite / Vitest ---
-vitest.config.*.timestamp-*
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
