@@ -14,9 +14,11 @@ async def create_user(db: AsyncSession, data: UserCreate, hashed_password: str) 
     db.add(user)
     await db.commit()
     await db.refresh(user)
+
     return user
 
 async def get_by_email(db: AsyncSession, email: str) -> User | None:
     stmt = select(User).where(User.email == email)
     result = await db.execute(stmt)
+
     return result.scalars().first()
