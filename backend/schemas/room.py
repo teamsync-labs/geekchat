@@ -1,8 +1,8 @@
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, computed_field
+from uuid import UUID
 from core.config import settings
 from db.room_status import RoomStatus
-from uuid import UUID
 
 
 class RoomCreate(BaseModel): pass

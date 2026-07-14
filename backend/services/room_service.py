@@ -1,6 +1,6 @@
-from datetime import datetime
-from sqlalchemy import select
+from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.encoders import jsonable_encoder
 from models.room import Room
 from crud.room import create
 from schemas.room import RoomCreate
@@ -18,26 +18,15 @@ class RoomService:
         return room
 
     @staticmethod
-    async def get_room(db: AsyncSession, room_id) -> Room | None:
-        stmt = select(Room).where(Room.room_id == room_id)
-        result = await db.execute(stmt)
-
-        return result.scalars().first()
-
-    @staticmethod
-    def is_room_joinable(room: Room) -> dict | bool:
+    async def is_room_joinable(room: Room) -> dict | bool:
         if room.status == RoomStatus.ENDED:
-            return {
-                'joinable': False,
-                'code': 'ROOM_INACTIVE'   # maybe status's enum class ???
-            }
+            return jsonable_encoder( {'code': 'ROOM_INACTIVE'} )   # maybe status's enum class ???
 
-        elif room.expires_at < datetime.now():
-            return {
-                'joinable': False,
-                'code': 'ROOM_EXPIRED',
+        elif datetime.now(timezone.utc) > room.expires_at:
+            return jsonable_encoder( {
+                'code': 'ROOM_TIME_EXPIRED',
                 'expires_at': room.expires_at
-            }
+            } )
 
         else:
             return True
