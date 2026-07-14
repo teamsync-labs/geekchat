@@ -61,14 +61,12 @@ function ResearchCall() {
     "5. How does this compare to other solutions?",
   ];
 
-  // ===== ЭКРАН ЗАВЕРШЕНИЯ С АНИМАЦИЕЙ =====
   if (isCallEnded) {
     return (
       <div className="min-h-screen bg-[#0A1628] flex items-center justify-center p-4">
         <div className="text-center max-w-md w-full animate-scale-up">
-          {/* Анимированный телефон */}
           <div className="relative w-32 h-32 mx-auto mb-6">
-            <div className="absolute inset-0 bg-gradient-to-r from-[#2A4A7A] to-[#8AB4F8] rounded-full blur-2xl opacity-30 animate-pulse-glow" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#2A4A7A] to-[#8AB4F8] rounded-full blur-2xl opacity-30 animate-pulse" />
             <div className="absolute inset-0 bg-[#1A2D4A] rounded-full border border-[#2A4A7A]/30 flex items-center justify-center shadow-2xl shadow-[#2A4A7A]/20 animate-float">
               <span className="text-6xl">📞</span>
             </div>
@@ -97,11 +95,10 @@ function ResearchCall() {
     );
   }
 
-  // ===== ЭКРАН ЗАВЕРШЕНИЯ (ПРОМЕЖУТОЧНЫЙ) =====
   if (isEnding) {
     return (
       <div className="min-h-screen bg-[#0A1628] flex items-center justify-center p-4">
-        <div className="text-center animate-fade-out">
+        <div className="text-center animate-scale-up">
           <div className="w-24 h-24 mx-auto mb-4 rounded-3xl bg-gradient-to-br from-[#2A4A7A]/30 to-[#8AB4F8]/10 flex items-center justify-center border border-[#2A4A7A]/30 animate-float">
             <span className="text-5xl">📞</span>
           </div>
@@ -111,7 +108,6 @@ function ResearchCall() {
     );
   }
 
-  // ===== ОСНОВНОЙ ЭКРАН =====
   return (
     <div className="min-h-screen bg-[#0A1628] flex overflow-hidden relative">
       
@@ -200,9 +196,7 @@ function ResearchCall() {
             )}
           </div>
 
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 transition-all duration-700 ${
-            isEnding ? 'opacity-0 translate-y-10' : 'opacity-100 translate-y-0'
-          }">
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 transition-all duration-700">
             <div className="flex items-center gap-3 p-2 bg-[#0A1628]/60 backdrop-blur-2xl rounded-2xl border border-[#2A4A7A]/20 shadow-2xl shadow-black/50">
               <Button
                 onClick={toggleMute}
