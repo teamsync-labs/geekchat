@@ -1,9 +1,9 @@
 import React from 'react';
 import './index.css';
-import ResearchCall from './components/ResearchCall';
+import AuthScreen from './components/AuthScreen';
 
 function App() {
-  return <ResearchCall />;
+  return <AuthScreen />;
 }
 
 export default App;
