@@ -12,7 +12,7 @@ class Room(Base):
                             values_callable=lambda obj: [e.value for e in obj]),
                             default=RoomStatus.ACTIVE, nullable=False, server_default=RoomStatus.ACTIVE.value)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    expires_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
 
     def __repr__(self):
         return (f"Room(id={self.room_id}, creator_id={self.creator_id}, status={self.status}, "

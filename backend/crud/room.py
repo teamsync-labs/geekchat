@@ -1,14 +1,13 @@
-from datetime import timedelta, datetime, timezone
+from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.room import Room
-from schemas.room import RoomCreate
 
 
-async def create(db: AsyncSession, data: RoomCreate, creator_id: int, duration: int) -> Room:
+async def create(db: AsyncSession, creator_id: int, ttl: datetime) -> Room:
     room = Room(
-        expires_at=datetime.now(timezone.utc) + timedelta(minutes=duration),
-        creator_id=creator_id
+        creator_id=creator_id,
+        expires_at=ttl
     )
 
     db.add(room)
@@ -17,7 +16,7 @@ async def create(db: AsyncSession, data: RoomCreate, creator_id: int, duration: 
 
     return room
 
-async def get_room(db: AsyncSession, room_id) -> Room | None:
+async def get_room_by_id(db: AsyncSession, room_id) -> Room | None:
     stmt = select(Room).where(Room.room_id == room_id)
     result = await db.execute(stmt)
 

@@ -5,19 +5,23 @@ from core.config import settings
 from db.room_status import RoomStatus
 
 
-class RoomCreate(BaseModel): pass
+class RoomCreate(BaseModel):
+    ttl: int     # validate ?? min max
 
 
-class RoomResponse(BaseModel):
+class BaseRoomResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     room_id: UUID
-    creator_id: int
-    status: RoomStatus
-    created_at: datetime
-    expires_at: datetime
 
+
+class RoomJoinLinkResponse(BaseRoomResponse):
     @computed_field(return_type=str)
     @property
     def join_url(self):
         return f'{settings.BASE_URL}/call/{self.room_id}'
+
+
+class RoomPreviewResponse(BaseRoomResponse):
+    status: RoomStatus
+    created_at: datetime

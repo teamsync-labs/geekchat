@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.encoders import jsonable_encoder
 from models.room import Room
@@ -8,12 +8,11 @@ from db.room_status import RoomStatus
 
 
 class RoomService:
-    DEFAULT_DURATION_MINUTES = 30  # можно где-нибудь менять извне
+    DURATION = lambda t: datetime.now(timezone.utc) + timedelta(minutes=t)
 
     @staticmethod
     async def create(db: AsyncSession, data: RoomCreate, creator_id: int) -> Room:
-        room = await create(db, data, creator_id=creator_id,
-                            duration=RoomService.DEFAULT_DURATION_MINUTES)
+        room = await create(db, creator_id=creator_id, ttl=RoomService.DURATION(data.ttl))
 
         return room
 
