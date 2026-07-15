@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { X } from 'lucide-react';
 
-export const CallDialog = ({ isOpen, onClose, onCall, isConnecting }) => {
+export const CallDialog = ({ isOpen, onClose, onCall, isConnecting, myId }) => {
   const [remoteId, setRemoteId] = useState('');
 
   const handleSubmit = (e) => {
@@ -22,6 +22,7 @@ export const CallDialog = ({ isOpen, onClose, onCall, isConnecting }) => {
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-light text-[#E8EDF5]">📞 Новый звонок</h3>
           <button
+            type="button"
             onClick={onClose}
             className="text-[#8A9BB5] hover:text-white transition-colors"
           >
@@ -33,17 +34,18 @@ export const CallDialog = ({ isOpen, onClose, onCall, isConnecting }) => {
           <p className="text-sm text-[#8A9BB5] mb-4">
             Введите ID собеседника, чтобы начать звонок.
           </p>
-          
+
           <div className="space-y-4">
             <div>
-              <label className="text-xs text-[#6A7A95] block mb-1.5">ID собеседника</label>
+              <label className="text-xs text-[#6A7A95] block mb-1.5">Peer ID собеседника</label>
               <Input
                 type="text"
                 value={remoteId}
                 onChange={(e) => setRemoteId(e.target.value)}
                 placeholder="Введите Peer ID..."
-                className="bg-[#0A1628] border-[#2A4A7A] text-[#E8EDF5] placeholder:text-[#6A7A95] focus:border-[#3A5A8A]"
+                className="bg-[#0A1628] border-[#2A4A7A] text-[#E8EDF5] placeholder:text-[#6A7A95] focus:border-[#3A5A8A] w-full"
                 autoFocus
+                required
               />
             </div>
 

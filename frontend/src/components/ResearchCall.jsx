@@ -12,7 +12,6 @@ import { CallControls } from './call/CallControls';
 import { CallDialog } from './call/CallDialog';
 
 function ResearchCall() {
-  // ===== СОСТОЯНИЯ =====
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(false);
@@ -24,7 +23,6 @@ function ResearchCall() {
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const [showCallDialog, setShowCallDialog] = useState(false);
   
-  // ===== PEERJS ХУК =====
   const { 
     myId, 
     remoteStream, 
@@ -35,7 +33,6 @@ function ResearchCall() {
     endCall 
   } = usePeer();
 
-  // ===== ТАЙМЕР =====
   useEffect(() => {
     if (isPaused) return;
     const timer = setInterval(() => {
@@ -44,14 +41,12 @@ function ResearchCall() {
     return () => clearInterval(timer);
   }, [isPaused]);
 
-  // ===== ФОРМАТ ТАЙМЕРА =====
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
-  // ===== ОБРАБОТЧИКИ =====
   const toggleMute = () => setIsMuted(!isMuted);
   const toggleVideo = () => setIsVideoOff(!isVideoOff);
   const toggleSpeaker = () => setIsSpeakerOn(!isSpeakerOn);
@@ -72,11 +67,11 @@ function ResearchCall() {
   };
 
   const handleCall = (remoteId) => {
+    console.log('📞 Звонок на:', remoteId);
     callPeer(remoteId);
     setShowCallDialog(false);
   };
 
-  // ===== ДАННЫЕ =====
   const questions = [
     "1. Tell me about a time you used our product.",
     "2. What were you trying to achieve?",
@@ -88,17 +83,14 @@ function ResearchCall() {
   return (
     <div className="min-h-screen bg-[#0A1628] flex overflow-hidden relative">
       
-      {/* ===== ФОН ===== */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-r from-[#2A4A7A]/5 via-[#8AB4F8]/5 to-[#2A4A7A]/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#3A5A8A]/5 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-0 w-[300px] h-[300px] bg-[#4A6A9A]/5 rounded-full blur-3xl" />
       </div>
 
-      {/* ===== ОСНОВНАЯ ОБЛАСТЬ ===== */}
       <div className="flex-1 flex flex-col p-8 relative z-10">
         
-        {/* ===== ХЕДЕР ===== */}
         <div className="flex items-center justify-between mb-8 animate-slide-down">
           <div className="flex items-center gap-6">
             <Button variant="ghost" className="text-[#6A7A95] hover:text-white hover:bg-[#2A4A7A]/20 rounded-2xl w-12 h-12 p-0 transition-all duration-300 hover:scale-105 active:scale-95">
@@ -142,12 +134,10 @@ function ResearchCall() {
           </div>
         </div>
 
-        {/* ===== ВИДЕО-ОБЛАСТЬ ===== */}
         <div className="flex-1 bg-gradient-to-br from-[#162035] to-[#1A2D4A] rounded-3xl relative overflow-hidden shadow-2xl shadow-black/50 border border-[#2A4A7A]/10">
           
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxwYXRoIGQ9Ik0gMCAwIEwgMCA2MCBMIDYwIDYwIEwgNjAgMCBaIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoNDIsNzQsMTIyLDAuMDUpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjcGF0dGVybikiLz48L3N2Zz4=')] opacity-30"></div>
 
-          {/* ===== ВИДЕО СОБЕСЕДНИКА ===== */}
           <div className="absolute inset-0 flex items-center justify-center p-4">
             <VideoTile
               stream={remoteStream}
@@ -159,7 +149,6 @@ function ResearchCall() {
             />
           </div>
 
-          {/* ===== МИНИ-ОКНО СВОЕГО ВИДЕО ===== */}
           <div className="absolute bottom-6 right-6 w-52 h-36 bg-[#1A2D4A] rounded-2xl border border-[#2A4A7A]/20 overflow-hidden shadow-2xl shadow-black/50 backdrop-blur-sm transition-all duration-300 hover:scale-105">
             <VideoTile
               stream={localStream}
@@ -172,7 +161,6 @@ function ResearchCall() {
             />
           </div>
 
-          {/* ===== КНОПКИ УПРАВЛЕНИЯ ===== */}
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 transition-all duration-700">
             <CallControls
               isMuted={isMuted}
@@ -187,7 +175,6 @@ function ResearchCall() {
             />
           </div>
 
-          {/* ===== КНОПКА ВЫЗОВА ===== */}
           {!isCallActive && !isConnecting && (
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
               <Button
@@ -210,7 +197,6 @@ function ResearchCall() {
         </div>
       </div>
 
-      {/* ===== ПРАВАЯ ПАНЕЛЬ ===== */}
       <div className="w-[400px] bg-[#162035] border-l border-[#2A4A7A]/10 flex flex-col backdrop-blur-sm relative z-10">
         
         <div className="px-6 pt-6 pb-4 border-b border-[#2A4A7A]/10">
@@ -326,7 +312,6 @@ function ResearchCall() {
         </div>
       </div>
 
-      {/* ===== МОДАЛКА ПОДТВЕРЖДЕНИЯ ===== */}
       {showEndConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
           <div className="bg-[#162035] rounded-3xl border border-[#2A4A7A]/20 p-8 max-w-sm w-full shadow-2xl shadow-black/50 animate-scale-up">
@@ -351,7 +336,6 @@ function ResearchCall() {
         </div>
       )}
 
-      {/* ===== ДИАЛОГ ВЫЗОВА ===== */}
       <CallDialog
         isOpen={showCallDialog}
         onClose={() => setShowCallDialog(false)}
