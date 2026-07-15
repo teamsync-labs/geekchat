@@ -1,58 +1,82 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Mic, MicOff, Video, VideoOff, PhoneOff, 
-  Volume2, VolumeX, 
   FileText, Clock, Users, CheckCircle, Circle,
   Play, Pause, SkipForward, SkipBack,
   ArrowLeft, Share2, Settings, Plus,
 } from 'lucide-react';
+import { usePeer } from '../hooks/usePeer';
+import { VideoTile } from './call/VideoTile';
+import { CallControls } from './call/CallControls';
+import { CallDialog } from './call/CallDialog';
 
 function ResearchCall() {
+  // ===== СОСТОЯНИЯ =====
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(false);
-  const [isRecording, setIsRecording] = useState(true);
+  const [isRecording] = useState(true);
   const [activeTab, setActiveTab] = useState('guide');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [callTime, setCallTime] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [isEnding, setIsEnding] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
-  const [isCallEnded, setIsCallEnded] = useState(false);
+  const [showCallDialog, setShowCallDialog] = useState(false);
+  
+  // ===== PEERJS ХУК =====
+  const { 
+    myId, 
+    remoteStream, 
+    localStream, 
+    isCallActive, 
+    isConnecting,
+    callPeer,
+    endCall 
+  } = usePeer();
 
+  // ===== ТАЙМЕР =====
   useEffect(() => {
-    if (isPaused || isEnding || isCallEnded) return;
+    if (isPaused) return;
     const timer = setInterval(() => {
       setCallTime(prev => prev + 1);
     }, 1000);
     return () => clearInterval(timer);
-  }, [isPaused, isEnding, isCallEnded]);
+  }, [isPaused]);
 
+  // ===== ФОРМАТ ТАЙМЕРА =====
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
+  // ===== ОБРАБОТЧИКИ =====
   const toggleMute = () => setIsMuted(!isMuted);
   const toggleVideo = () => setIsVideoOff(!isVideoOff);
   const toggleSpeaker = () => setIsSpeakerOn(!isSpeakerOn);
   const togglePause = () => setIsPaused(!isPaused);
-  const handleEndCall = () => setShowEndConfirm(true);
-  const confirmEndCall = () => {
-    setIsEnding(true);
-    setShowEndConfirm(false);
-    setTimeout(() => {
-      setIsCallEnded(true);
-      setIsEnding(false);
-      setIsRecording(false);
-    }, 800);
+  
+  const handleEndCall = () => {
+    setShowEndConfirm(true);
   };
-  const cancelEndCall = () => setShowEndConfirm(false);
 
+  const confirmEndCall = () => {
+    setShowEndConfirm(false);
+    endCall();
+    setCallTime(0);
+  };
+
+  const cancelEndCall = () => {
+    setShowEndConfirm(false);
+  };
+
+  const handleCall = (remoteId) => {
+    callPeer(remoteId);
+    setShowCallDialog(false);
+  };
+
+  // ===== ДАННЫЕ =====
   const questions = [
     "1. Tell me about a time you used our product.",
     "2. What were you trying to achieve?",
@@ -61,64 +85,20 @@ function ResearchCall() {
     "5. How does this compare to other solutions?",
   ];
 
-  if (isCallEnded) {
-    return (
-      <div className="min-h-screen bg-[#0A1628] flex items-center justify-center p-4">
-        <div className="text-center max-w-md w-full animate-scale-up">
-          <div className="relative w-32 h-32 mx-auto mb-6">
-            <div className="absolute inset-0 bg-gradient-to-r from-[#2A4A7A] to-[#8AB4F8] rounded-full blur-2xl opacity-30 animate-pulse" />
-            <div className="absolute inset-0 bg-[#1A2D4A] rounded-full border border-[#2A4A7A]/30 flex items-center justify-center shadow-2xl shadow-[#2A4A7A]/20 animate-float">
-              <span className="text-6xl">📞</span>
-            </div>
-            <div className="absolute inset-[-8px] rounded-full border border-[#2A4A7A]/20 animate-spin-slow" />
-            <div className="absolute inset-[-16px] rounded-full border border-[#8AB4F8]/10 animate-spin-slow delay-500" />
-          </div>
-
-          <h2 className="text-3xl font-light bg-gradient-to-r from-[#E8EDF5] to-[#8AB4F8] bg-clip-text text-transparent mb-2 animate-slide-down">
-            Звонок завершён
-          </h2>
-          <p className="text-[#8A9BB5] font-mono text-lg mb-1 animate-slide-down delay-100">
-            {formatTime(callTime)}
-          </p>
-          <p className="text-[#6A7A95] text-sm font-light mb-8 animate-slide-down delay-200">
-            Спасибо за отличный разговор!
-          </p>
-          
-          <Button 
-            onClick={() => window.location.reload()}
-            className="bg-gradient-to-r from-[#2A4A7A] to-[#3A5A8A] hover:from-[#3A5A8A] hover:to-[#4A6A9A] text-white rounded-2xl px-12 py-4 text-sm font-light shadow-xl shadow-[#2A4A7A]/20 transition-all duration-300 hover:scale-105 active:scale-95 animate-slide-down delay-300"
-          >
-            Новый звонок
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (isEnding) {
-    return (
-      <div className="min-h-screen bg-[#0A1628] flex items-center justify-center p-4">
-        <div className="text-center animate-scale-up">
-          <div className="w-24 h-24 mx-auto mb-4 rounded-3xl bg-gradient-to-br from-[#2A4A7A]/30 to-[#8AB4F8]/10 flex items-center justify-center border border-[#2A4A7A]/30 animate-float">
-            <span className="text-5xl">📞</span>
-          </div>
-          <p className="text-white/40 font-light text-sm animate-pulse">Завершение звонка...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#0A1628] flex overflow-hidden relative">
       
+      {/* ===== ФОН ===== */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-r from-[#2A4A7A]/5 via-[#8AB4F8]/5 to-[#2A4A7A]/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#3A5A8A]/5 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-0 w-[300px] h-[300px] bg-[#4A6A9A]/5 rounded-full blur-3xl" />
       </div>
 
+      {/* ===== ОСНОВНАЯ ОБЛАСТЬ ===== */}
       <div className="flex-1 flex flex-col p-8 relative z-10">
         
+        {/* ===== ХЕДЕР ===== */}
         <div className="flex items-center justify-between mb-8 animate-slide-down">
           <div className="flex items-center gap-6">
             <Button variant="ghost" className="text-[#6A7A95] hover:text-white hover:bg-[#2A4A7A]/20 rounded-2xl w-12 h-12 p-0 transition-all duration-300 hover:scale-105 active:scale-95">
@@ -132,6 +112,11 @@ function ResearchCall() {
                 <Badge className="bg-[#2A4A7A]/20 text-[#8AB4F8] border border-[#2A4A7A]/30 rounded-xl px-3 py-1 text-[10px] font-light">
                   🔒 Encrypted
                 </Badge>
+                {isCallActive && (
+                  <Badge className="bg-green-500/20 text-green-400 border border-green-500/30 animate-pulse">
+                    ● Live
+                  </Badge>
+                )}
               </div>
               <div className="flex items-center gap-4 text-sm mt-1">
                 <span className="text-white/70 font-light">Interview – Alex Kim</span>
@@ -143,6 +128,7 @@ function ResearchCall() {
                     Recording
                   </span>
                 )}
+                <span className="text-white/30 text-xs font-mono">ID: {myId || '...'}</span>
               </div>
             </div>
           </div>
@@ -156,100 +142,75 @@ function ResearchCall() {
           </div>
         </div>
 
-        <div className={`flex-1 bg-gradient-to-br from-[#162035] to-[#1A2D4A] rounded-3xl relative overflow-hidden shadow-2xl shadow-black/50 border border-[#2A4A7A]/10 transition-all duration-700 ${
-          isEnding ? 'scale-90 opacity-0 blur-sm' : 'scale-100 opacity-100 blur-0'
-        }`}>
+        {/* ===== ВИДЕО-ОБЛАСТЬ ===== */}
+        <div className="flex-1 bg-gradient-to-br from-[#162035] to-[#1A2D4A] rounded-3xl relative overflow-hidden shadow-2xl shadow-black/50 border border-[#2A4A7A]/10">
           
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxwYXRoIGQ9Ik0gMCAwIEwgMCA2MCBMIDYwIDYwIEwgNjAgMCBaIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoNDIsNzQsMTIyLDAuMDUpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjcGF0dGVybikiLz48L3N2Zz4=')] opacity-30"></div>
 
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <div className="relative inline-block">
-                <div className="absolute inset-0 bg-gradient-to-r from-[#2A4A7A] to-[#8AB4F8] rounded-full blur-2xl opacity-20" />
-                <div className="absolute inset-0 rounded-full border border-[#2A4A7A]/20 animate-spin-slow" />
-                <Avatar className="w-32 h-32 mx-auto mb-3 border-2 border-[#2A4A7A]/30 shadow-2xl shadow-[#2A4A7A]/10 transition-all duration-500 hover:scale-105">
-                  <AvatarFallback className="bg-gradient-to-br from-[#2A4A7A] to-[#3A5A8A] text-white/90 text-4xl font-light">
-                    AK
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-              <p className="text-white/90 font-light text-lg">Alex Kim</p>
-              <p className="text-sm text-white/30 font-light">Participant</p>
-            </div>
+          {/* ===== ВИДЕО СОБЕСЕДНИКА ===== */}
+          <div className="absolute inset-0 flex items-center justify-center p-4">
+            <VideoTile
+              stream={remoteStream}
+              name="Alex Kim"
+              isVideoOff={isVideoOff}
+              isMuted={isMuted}
+              className="w-full h-full"
+              avatarFallback="AK"
+            />
           </div>
 
-          <div className="absolute bottom-6 right-6 w-48 h-36 bg-[#1A2D4A] rounded-2xl border border-[#2A4A7A]/20 overflow-hidden shadow-2xl shadow-black/50 backdrop-blur-sm transition-all duration-300 hover:scale-105">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <Avatar className="w-14 h-14 mx-auto mb-1 border border-[#2A4A7A]/30 transition-all duration-300 hover:scale-110">
-                  <AvatarFallback className="bg-[#0A1628] text-white/60 text-xl font-light">
-                    You
-                  </AvatarFallback>
-                </Avatar>
-                <p className="text-xs text-white/20 font-light">You</p>
-              </div>
-            </div>
-            {isMuted && (
-              <div className="absolute top-3 left-3">
-                <MicOff className="w-3 h-3 text-red-400" />
-              </div>
-            )}
+          {/* ===== МИНИ-ОКНО СВОЕГО ВИДЕО ===== */}
+          <div className="absolute bottom-6 right-6 w-52 h-36 bg-[#1A2D4A] rounded-2xl border border-[#2A4A7A]/20 overflow-hidden shadow-2xl shadow-black/50 backdrop-blur-sm transition-all duration-300 hover:scale-105">
+            <VideoTile
+              stream={localStream}
+              name="You"
+              isLocal={true}
+              isVideoOff={isVideoOff}
+              isMuted={isMuted}
+              className="w-full h-full"
+              avatarFallback="YO"
+            />
           </div>
 
+          {/* ===== КНОПКИ УПРАВЛЕНИЯ ===== */}
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 transition-all duration-700">
-            <div className="flex items-center gap-3 p-2 bg-[#0A1628]/60 backdrop-blur-2xl rounded-2xl border border-[#2A4A7A]/20 shadow-2xl shadow-black/50">
-              <Button
-                onClick={toggleMute}
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 ${
-                  isMuted 
-                    ? 'bg-red-500 hover:bg-red-600 text-white shadow-xl shadow-red-500/30' 
-                    : 'bg-[#2A4A7A] text-white shadow-xl shadow-[#2A4A7A]/30'
-                }`}
-              >
-                {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                {!isMuted && (
-                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full shadow-lg shadow-green-500/30 animate-pulse" />
-                )}
-              </Button>
+            <CallControls
+              isMuted={isMuted}
+              onToggleMute={toggleMute}
+              isVideoOff={isVideoOff}
+              onToggleVideo={toggleVideo}
+              isSpeakerOn={isSpeakerOn}
+              onToggleSpeaker={toggleSpeaker}
+              onEndCall={handleEndCall}
+              isConnecting={isConnecting}
+              isCallActive={isCallActive}
+            />
+          </div>
 
+          {/* ===== КНОПКА ВЫЗОВА ===== */}
+          {!isCallActive && !isConnecting && (
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
               <Button
-                onClick={toggleVideo}
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 ${
-                  isVideoOff 
-                    ? 'bg-red-500 hover:bg-red-600 text-white shadow-xl shadow-red-500/30' 
-                    : 'bg-[#2A4A7A] text-white shadow-xl shadow-[#2A4A7A]/30'
-                }`}
+                onClick={() => setShowCallDialog(true)}
+                className="bg-gradient-to-r from-[#2A4A7A] to-[#3A5A8A] hover:from-[#3A5A8A] hover:to-[#4A6A9A] text-white rounded-2xl px-8 py-4 text-lg font-light shadow-2xl shadow-[#2A4A7A]/30 transition-all duration-300 hover:scale-105 active:scale-95"
               >
-                {isVideoOff ? <VideoOff className="w-5 h-5" /> : <Video className="w-5 h-5" />}
-                {!isVideoOff && (
-                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full shadow-lg shadow-green-500/30 animate-pulse" />
-                )}
-              </Button>
-
-              <Button
-                onClick={toggleSpeaker}
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 ${
-                  isSpeakerOn 
-                    ? 'bg-[#3A5A8A] text-white shadow-xl shadow-[#3A5A8A]/30' 
-                    : 'bg-[#1A2D4A]/40 text-[#8A9BB5] hover:text-white border border-[#2A4A7A]/20'
-                }`}
-              >
-                {isSpeakerOn ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-              </Button>
-
-              <div className="w-px h-10 bg-[#2A4A7A]/20"></div>
-
-              <Button
-                onClick={handleEndCall}
-                className="w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 bg-red-500 hover:bg-red-600 text-white shadow-xl shadow-red-500/30 hover:shadow-red-500/50"
-              >
-                <PhoneOff className="w-5 h-5" />
+                📞 Позвонить собеседнику
               </Button>
             </div>
-          </div>
+          )}
+
+          {isConnecting && (
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+              <div className="text-center">
+                <div className="w-12 h-12 border-4 border-[#2A4A7A] border-t-[#8AB4F8] rounded-full animate-spin-slow mx-auto mb-3" />
+                <p className="text-white/60 font-light">Соединение...</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
+      {/* ===== ПРАВАЯ ПАНЕЛЬ ===== */}
       <div className="w-[400px] bg-[#162035] border-l border-[#2A4A7A]/10 flex flex-col backdrop-blur-sm relative z-10">
         
         <div className="px-6 pt-6 pb-4 border-b border-[#2A4A7A]/10">
@@ -365,6 +326,7 @@ function ResearchCall() {
         </div>
       </div>
 
+      {/* ===== МОДАЛКА ПОДТВЕРЖДЕНИЯ ===== */}
       {showEndConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
           <div className="bg-[#162035] rounded-3xl border border-[#2A4A7A]/20 p-8 max-w-sm w-full shadow-2xl shadow-black/50 animate-scale-up">
@@ -388,6 +350,15 @@ function ResearchCall() {
           </div>
         </div>
       )}
+
+      {/* ===== ДИАЛОГ ВЫЗОВА ===== */}
+      <CallDialog
+        isOpen={showCallDialog}
+        onClose={() => setShowCallDialog(false)}
+        onCall={handleCall}
+        isConnecting={isConnecting}
+        myId={myId}
+      />
     </div>
   );
 }
