@@ -29,21 +29,18 @@ function ResearchCall() {
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
 
-  // Подключаем локальное видео
   useEffect(() => {
     if (localVideoRef.current && localStream) {
       localVideoRef.current.srcObject = localStream;
     }
   }, [localStream]);
 
-  // Подключаем удалённое видео
   useEffect(() => {
     if (remoteVideoRef.current && remoteStream) {
       remoteVideoRef.current.srcObject = remoteStream;
     }
   }, [remoteStream]);
 
-  // Управление видео (вкл/выкл)
   useEffect(() => {
     if (localStream) {
       const videoTrack = localStream.getVideoTracks()[0];
@@ -53,7 +50,6 @@ function ResearchCall() {
     }
   }, [isVideoOff, localStream]);
 
-  // Управление микрофоном (вкл/выкл)
   useEffect(() => {
     if (localStream) {
       const audioTrack = localStream.getAudioTracks()[0];
@@ -164,7 +160,9 @@ function ResearchCall() {
                 <span className="w-px h-4 bg-[#2A4A7A]/30"></span>
                 <span className="text-white/70 font-light">Interview – Alex Kim</span>
                 <span className="w-px h-4 bg-[#2A4A7A]/30"></span>
-                <span className="font-mono text-[#8AB4F8] font-light tracking-wider">{formatTime(callTime)}</span>
+                <span className="font-mono text-[#8AB4F8] font-light tracking-wider" data-testid="timer">
+                  {formatTime(callTime)}
+                </span>
                 {isRecording && (
                   <span className="flex items-center gap-2 text-red-400 text-xs font-light">
                     <span className="w-2 h-2 bg-red-500 rounded-full shadow-lg shadow-red-500/30"></span>
@@ -188,7 +186,6 @@ function ResearchCall() {
           
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxwYXRoIGQ9Ik0gMCAwIEwgMCA2MCBMIDYwIDYwIEwgNjAgMCBaIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoNDIsNzQsMTIyLDAuMDUpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjcGF0dGVybikiLz48L3N2Zz4=')] opacity-30"></div>
 
-          {/* Удалённое видео */}
           <div className="absolute inset-0 flex items-center justify-center">
             {remoteStream ? (
               <video
@@ -233,7 +230,6 @@ function ResearchCall() {
             )}
           </div>
 
-          {/* Локальное видео (мини-окно) */}
           <div className="absolute bottom-6 right-6 w-48 h-36 bg-[#1A2D4A] rounded-2xl border border-[#2A4A7A]/20 overflow-hidden shadow-2xl shadow-black/50 backdrop-blur-sm">
             {localStream ? (
               <video
@@ -273,13 +269,14 @@ function ResearchCall() {
             <div className="flex items-center gap-3 p-2 bg-[#0A1628]/60 backdrop-blur-2xl rounded-2xl border border-[#2A4A7A]/20 shadow-2xl shadow-black/50">
               <Button
                 onClick={toggleMute}
+                data-testid="mic-button"
                 className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 ${
                   isMuted 
                     ? 'bg-red-500 hover:bg-red-600 text-white shadow-xl shadow-red-500/30' 
                     : 'bg-[#2A4A7A] text-white shadow-xl shadow-[#2A4A7A]/30'
                 }`}
               >
-                {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                {isMuted ? <MicOff className="w-5 h-5" data-testid="mic-off-icon" /> : <Mic className="w-5 h-5" />}
                 {!isMuted && (
                   <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full shadow-lg shadow-green-500/30" />
                 )}
@@ -287,13 +284,14 @@ function ResearchCall() {
 
               <Button
                 onClick={toggleVideo}
+                data-testid="video-button"
                 className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 ${
                   isVideoOff 
                     ? 'bg-red-500 hover:bg-red-600 text-white shadow-xl shadow-red-500/30' 
                     : 'bg-[#2A4A7A] text-white shadow-xl shadow-[#2A4A7A]/30'
                 }`}
               >
-                {isVideoOff ? <VideoOff className="w-5 h-5" /> : <Video className="w-5 h-5" />}
+                {isVideoOff ? <VideoOff className="w-5 h-5" data-testid="video-off-icon" /> : <Video className="w-5 h-5" />}
                 {!isVideoOff && (
                   <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full shadow-lg shadow-green-500/30" />
                 )}
@@ -314,6 +312,7 @@ function ResearchCall() {
 
               <Button
                 onClick={handleEndCall}
+                data-testid="end-call-button"
                 className="w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 bg-red-500 hover:bg-red-600 text-white shadow-xl shadow-red-500/30"
               >
                 <PhoneOff className="w-5 h-5" />
@@ -335,6 +334,7 @@ function ResearchCall() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
+                data-testid={`tab-${tab.id}`}
                 className={`
                   flex-1 py-3 rounded-xl text-xs font-light transition-all duration-300
                   ${activeTab === tab.id 
@@ -445,7 +445,7 @@ function ResearchCall() {
               <div className="w-16 h-16 mx-auto mb-4 bg-red-500/10 rounded-2xl flex items-center justify-center border border-red-500/20">
                 <PhoneOff className="w-6 h-6 text-red-400" />
               </div>
-              <h3 className="text-lg font-light text-white/90 mb-1">Завершить звонок?</h3>
+              <h3 className="text-lg font-light text-white/90 mb-1" data-testid="end-call-modal-title">Завершить звонок?</h3>
               <p className="text-sm font-light text-white/20 mb-6">
                 Вы уверены, что хотите завершить звонок?
               </p>

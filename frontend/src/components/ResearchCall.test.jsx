@@ -1,6 +1,19 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
+vi.mock('@/hooks/usePeer', () => ({
+  usePeer: () => ({
+    myId: 'test-id-123',
+    remoteStream: null,
+    localStream: null,
+    isReady: true,
+    error: null,
+    callPeer: () => {},
+    startMedia: () => {},
+  }),
+}));
+
 import ResearchCall from './ResearchCall';
 
 describe('ResearchCall', () => {
@@ -9,14 +22,17 @@ describe('ResearchCall', () => {
     expect(screen.getByText('Alex Kim')).toBeInTheDocument();
   });
 
+  it('should display timer with data-testid', () => {
+    render(<ResearchCall />);
+    expect(screen.getByTestId('timer')).toBeInTheDocument();
+  });
+
   it('should toggle mute when mic button clicked', async () => {
     const user = userEvent.setup();
     render(<ResearchCall />);
     const micButton = screen.getByTestId('mic-button');
     await user.click(micButton);
-    // Ищем иконку внутри кнопки
-    const micOffIcon = within(micButton).getByTestId('mic-off-icon');
-    expect(micOffIcon).toBeInTheDocument();
+    expect(screen.getByTestId('mic-off-icon')).toBeInTheDocument();
   });
 
   it('should toggle video when video button clicked', async () => {
@@ -24,9 +40,7 @@ describe('ResearchCall', () => {
     render(<ResearchCall />);
     const videoButton = screen.getByTestId('video-button');
     await user.click(videoButton);
-    // Ищем иконку внутри кнопки
-    const videoOffIcon = within(videoButton).getByTestId('video-off-icon');
-    expect(videoOffIcon).toBeInTheDocument();
+    expect(screen.getByTestId('video-off-icon')).toBeInTheDocument();
   });
 
   it('should open end call modal when end button clicked', async () => {
@@ -45,5 +59,17 @@ describe('ResearchCall', () => {
     const cancelButton = screen.getByText('Отмена');
     await user.click(cancelButton);
     expect(screen.queryByTestId('end-call-modal-title')).not.toBeInTheDocument();
+  });
+
+  it('should switch tabs when clicking guide/notes/timeline', async () => {
+    const user = userEvent.setup();
+    render(<ResearchCall />);
+    expect(screen.getByText('Interview guide')).toBeInTheDocument();
+    const notesTab = screen.getByText('Notes');
+    await user.click(notesTab);
+    expect(screen.getByText('Notes will appear here')).toBeInTheDocument();
+    const timelineTab = screen.getByText('Timeline');
+    await user.click(timelineTab);
+    expect(screen.getByText('Timeline will appear here')).toBeInTheDocument();
   });
 });
