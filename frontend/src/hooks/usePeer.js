@@ -6,116 +6,116 @@ export const usePeer = () => {
   const [myId, setMyId] = useState('');
   const [remoteStream, setRemoteStream] = useState(null);
   const [localStream, setLocalStream] = useState(null);
-  const [isCallActive, setIsCallActive] = useState(false);
-  const [isConnecting, setIsConnecting] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  const [error, setError] = useState(null);
   const peerRef = useRef(null);
+
+  // Запрос доступа к камере и микрофону
+  const startMedia = async () => {
+    try {
+      console.log('📷 Запрашиваем доступ к камере и микрофону...');
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: 'user'
+        },
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true
+        }
+      });
+      console.log('✅ Доступ к камере и микрофону получен');
+      setLocalStream(stream);
+      return stream;
+    } catch (err) {
+      console.error('❌ Ошибка доступа к камере/микрофону:', err);
+      setError(err.message);
+      alert('⚠️ Не удалось получить доступ к камере и микрофону. Проверьте разрешения в браузере.');
+      return null;
+    }
+  };
 
   useEffect(() => {
     const newPeer = new Peer(undefined, {
       debug: 2,
     });
 
-    newPeer.on('open', (id) => {
+    newPeer.on('open', async (id) => {
       console.log('✅ Мой Peer ID:', id);
       setMyId(id);
+      setIsReady(true);
+
+      // Запрашиваем доступ к камере и микрофону
+      await startMedia();
     });
 
     newPeer.on('call', (call) => {
       console.log('📞 Входящий звонок от:', call.peer);
-      setIsConnecting(true);
       
-      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then((stream) => {
-          setLocalStream(stream);
-          call.answer(stream);
-          call.on('stream', (remoteStream) => {
-            setRemoteStream(remoteStream);
-            setIsCallActive(true);
-            setIsConnecting(false);
-            console.log('✅ Звонок установлен');
-          });
-        })
-        .catch(console.error);
+      if (localStream) {
+        call.answer(localStream);
+        call.on('stream', (remoteStream) => {
+          console.log('📹 Получен поток от:', call.peer);
+          setRemoteStream(remoteStream);
+        });
+      } else {
+        console.warn('⚠️ Нет локального потока для ответа');
+        // Пробуем получить доступ к медиа
+        startMedia().then((stream) => {
+          if (stream) {
+            call.answer(stream);
+            call.on('stream', (remoteStream) => {
+              setRemoteStream(remoteStream);
+            });
+          }
+        });
+      }
     });
 
     newPeer.on('error', (err) => {
       console.error('❌ PeerJS ошибка:', err);
-      setIsConnecting(false);
-    });
-
-    newPeer.on('disconnected', () => {
-      console.log('🔌 Peer отключён');
-      setIsCallActive(false);
+      setError(err.message);
     });
 
     peerRef.current = newPeer;
     setPeer(newPeer);
 
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        setLocalStream(stream);
-      })
-      .catch((err) => {
-        console.warn('⚠️ Не удалось получить доступ к камере/микрофону:', err);
-      });
-
     return () => {
-      newPeer.destroy();
-    };
-  }, []);
-
-  const callPeer = (remotePeerId) => {
-    if (!peerRef.current) {
-      console.warn('⚠️ Peer не инициализирован');
-      return;
-    }
-
-    setIsConnecting(true);
-
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        setLocalStream(stream);
-        const call = peerRef.current.call(remotePeerId, stream);
-        call.on('stream', (remoteStream) => {
-          setRemoteStream(remoteStream);
-          setIsCallActive(true);
-          setIsConnecting(false);
-          console.log('✅ Звонок установлен с:', remotePeerId);
-        });
-        call.on('error', (err) => {
-          console.error('❌ Ошибка звонка:', err);
-          setIsConnecting(false);
-        });
-      })
-      .catch((err) => {
-        console.error('❌ Ошибка доступа к медиа:', err);
-        setIsConnecting(false);
-      });
-  };
-
-  const endCall = () => {
-    if (peerRef.current) {
-      peerRef.current.disconnect();
+      if (newPeer) {
+        newPeer.destroy();
+        console.log('🔴 Peer уничтожен');
+      }
       if (localStream) {
         localStream.getTracks().forEach(track => track.stop());
       }
-      if (remoteStream) {
-        remoteStream.getTracks().forEach(track => track.stop());
-      }
-      setRemoteStream(null);
-      setIsCallActive(false);
-      setIsConnecting(false);
-      console.log('📴 Звонок завершён');
+    };
+  }, []);
+
+  const callPeer = (remoteId) => {
+    if (!peer || !localStream) {
+      console.warn('⚠️ Peer или локальный поток не готовы');
+      // Пробуем получить доступ к медиа
+      startMedia().then((stream) => {
+        if (stream && peer) {
+          console.log('📞 Звонок на:', remoteId);
+          const call = peer.call(remoteId, stream);
+          call.on('stream', (remoteStream) => {
+            console.log('📹 Получен поток от:', remoteId);
+            setRemoteStream(remoteStream);
+          });
+        }
+      });
+      return;
     }
+
+    console.log('📞 Звонок на:', remoteId);
+    const call = peer.call(remoteId, localStream);
+    call.on('stream', (remoteStream) => {
+      console.log('📹 Получен поток от:', remoteId);
+      setRemoteStream(remoteStream);
+    });
   };
 
-  return {
-    myId,
-    remoteStream,
-    localStream,
-    isCallActive,
-    isConnecting,
-    callPeer,
-    endCall,
-  };
+  return { peer, myId, remoteStream, localStream, isReady, error, callPeer, startMedia };
 };

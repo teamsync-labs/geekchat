@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { usePeer } from '@/hooks/usePeer';
 import { 
   Mic, MicOff, Video, VideoOff, PhoneOff, 
   Volume2, VolumeX, 
@@ -11,6 +12,8 @@ import {
 } from 'lucide-react';
 
 function ResearchCall() {
+  const { myId, remoteStream, localStream, isReady, callPeer } = usePeer();
+  const [remoteId, setRemoteId] = useState('');
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(false);
@@ -22,6 +25,43 @@ function ResearchCall() {
   const [isEnding, setIsEnding] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const [isCallEnded, setIsCallEnded] = useState(false);
+
+  const localVideoRef = useRef(null);
+  const remoteVideoRef = useRef(null);
+
+  // Подключаем локальное видео
+  useEffect(() => {
+    if (localVideoRef.current && localStream) {
+      localVideoRef.current.srcObject = localStream;
+    }
+  }, [localStream]);
+
+  // Подключаем удалённое видео
+  useEffect(() => {
+    if (remoteVideoRef.current && remoteStream) {
+      remoteVideoRef.current.srcObject = remoteStream;
+    }
+  }, [remoteStream]);
+
+  // Управление видео (вкл/выкл)
+  useEffect(() => {
+    if (localStream) {
+      const videoTrack = localStream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.enabled = !isVideoOff;
+      }
+    }
+  }, [isVideoOff, localStream]);
+
+  // Управление микрофоном (вкл/выкл)
+  useEffect(() => {
+    if (localStream) {
+      const audioTrack = localStream.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.enabled = !isMuted;
+      }
+    }
+  }, [isMuted, localStream]);
 
   useEffect(() => {
     if (isPaused || isEnding || isCallEnded) return;
@@ -53,6 +93,12 @@ function ResearchCall() {
   };
   const cancelEndCall = () => setShowEndConfirm(false);
 
+  const handleCall = () => {
+    if (remoteId.trim()) {
+      callPeer(remoteId.trim());
+    }
+  };
+
   const questions = [
     "1. Tell me about a time you used our product.",
     "2. What were you trying to achieve?",
@@ -64,29 +110,14 @@ function ResearchCall() {
   if (isCallEnded) {
     return (
       <div className="min-h-screen bg-[#0A1628] flex items-center justify-center p-4">
-        <div className="text-center max-w-md w-full animate-scale-up">
-          <div className="relative w-32 h-32 mx-auto mb-6">
-            <div className="absolute inset-0 bg-gradient-to-r from-[#2A4A7A] to-[#8AB4F8] rounded-full blur-2xl opacity-30 animate-pulse" />
-            <div className="absolute inset-0 bg-[#1A2D4A] rounded-full border border-[#2A4A7A]/30 flex items-center justify-center shadow-2xl shadow-[#2A4A7A]/20 animate-float">
-              <span className="text-6xl">📞</span>
-            </div>
-            <div className="absolute inset-[-8px] rounded-full border border-[#2A4A7A]/20 animate-spin-slow" />
-            <div className="absolute inset-[-16px] rounded-full border border-[#8AB4F8]/10 animate-spin-slow delay-500" />
-          </div>
-
-          <h2 className="text-3xl font-light bg-gradient-to-r from-[#E8EDF5] to-[#8AB4F8] bg-clip-text text-transparent mb-2 animate-slide-down">
-            Звонок завершён
-          </h2>
-          <p className="text-[#8A9BB5] font-mono text-lg mb-1 animate-slide-down delay-100">
-            {formatTime(callTime)}
-          </p>
-          <p className="text-[#6A7A95] text-sm font-light mb-8 animate-slide-down delay-200">
-            Спасибо за отличный разговор!
-          </p>
-          
+        <div className="text-center max-w-md w-full">
+          <div className="text-6xl mb-4">📞</div>
+          <h2 className="text-2xl font-light text-[#E8EDF5] mb-2">Звонок завершён</h2>
+          <p className="text-[#8A9BB5] font-mono text-lg">{formatTime(callTime)}</p>
+          <p className="text-[#6A7A95] text-sm font-light mb-6">Спасибо за отличный разговор!</p>
           <Button 
             onClick={() => window.location.reload()}
-            className="bg-gradient-to-r from-[#2A4A7A] to-[#3A5A8A] hover:from-[#3A5A8A] hover:to-[#4A6A9A] text-white rounded-2xl px-12 py-4 text-sm font-light shadow-xl shadow-[#2A4A7A]/20 transition-all duration-300 hover:scale-105 active:scale-95 animate-slide-down delay-300"
+            className="bg-[#2A4A7A] hover:bg-[#3A5A8A] text-white rounded-2xl px-10 py-3 text-sm font-light"
           >
             Новый звонок
           </Button>
@@ -98,30 +129,22 @@ function ResearchCall() {
   if (isEnding) {
     return (
       <div className="min-h-screen bg-[#0A1628] flex items-center justify-center p-4">
-        <div className="text-center animate-scale-up">
-          <div className="w-24 h-24 mx-auto mb-4 rounded-3xl bg-gradient-to-br from-[#2A4A7A]/30 to-[#8AB4F8]/10 flex items-center justify-center border border-[#2A4A7A]/30 animate-float">
-            <span className="text-5xl">📞</span>
-          </div>
-          <p className="text-white/40 font-light text-sm animate-pulse">Завершение звонка...</p>
+        <div className="text-center">
+          <div className="text-5xl mb-4">📞</div>
+          <p className="text-white/40 font-light text-sm">Завершение звонка...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0A1628] flex overflow-hidden relative">
+    <div className="min-h-screen bg-[#0A1628] flex overflow-hidden">
       
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-r from-[#2A4A7A]/5 via-[#8AB4F8]/5 to-[#2A4A7A]/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#3A5A8A]/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-0 w-[300px] h-[300px] bg-[#4A6A9A]/5 rounded-full blur-3xl" />
-      </div>
-
-      <div className="flex-1 flex flex-col p-8 relative z-10">
+      <div className="flex-1 flex flex-col p-8">
         
-        <div className="flex items-center justify-between mb-8 animate-slide-down">
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-6">
-            <Button variant="ghost" className="text-[#6A7A95] hover:text-white hover:bg-[#2A4A7A]/20 rounded-2xl w-12 h-12 p-0 transition-all duration-300 hover:scale-105 active:scale-95">
+            <Button variant="ghost" className="text-[#6A7A95] hover:text-white hover:bg-[#2A4A7A]/20 rounded-2xl w-12 h-12 p-0">
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
@@ -132,16 +155,19 @@ function ResearchCall() {
                 <Badge className="bg-[#2A4A7A]/20 text-[#8AB4F8] border border-[#2A4A7A]/30 rounded-xl px-3 py-1 text-[10px] font-light">
                   🔒 Encrypted
                 </Badge>
+                <Badge className="bg-green-500/20 text-green-400 border border-green-500/30 rounded-xl px-3 py-1 text-[10px] font-light">
+                  {isReady ? '✅ Online' : '⏳ Connecting...'}
+                </Badge>
               </div>
               <div className="flex items-center gap-4 text-sm mt-1">
+                <span className="text-white/70 font-light">Your ID: {myId || '...'}</span>
+                <span className="w-px h-4 bg-[#2A4A7A]/30"></span>
                 <span className="text-white/70 font-light">Interview – Alex Kim</span>
                 <span className="w-px h-4 bg-[#2A4A7A]/30"></span>
-                <span className="font-mono text-[#8AB4F8] font-light tracking-wider" data-testid="timer">
-                  {formatTime(callTime)}
-                </span>
+                <span className="font-mono text-[#8AB4F8] font-light tracking-wider">{formatTime(callTime)}</span>
                 {isRecording && (
                   <span className="flex items-center gap-2 text-red-400 text-xs font-light">
-                    <span className="w-2 h-2 bg-red-500 rounded-full shadow-lg shadow-red-500/30 animate-pulse"></span>
+                    <span className="w-2 h-2 bg-red-500 rounded-full shadow-lg shadow-red-500/30"></span>
                     Recording
                   </span>
                 )}
@@ -149,84 +175,127 @@ function ResearchCall() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" className="text-[#6A7A95] hover:text-white hover:bg-[#2A4A7A]/20 rounded-2xl w-12 h-12 p-0 transition-all duration-300 hover:scale-105 active:scale-95">
+            <Button variant="ghost" className="text-[#6A7A95] hover:text-white hover:bg-[#2A4A7A]/20 rounded-2xl w-12 h-12 p-0">
               <Share2 className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" className="text-[#6A7A95] hover:text-white hover:bg-[#2A4A7A]/20 rounded-2xl w-12 h-12 p-0 transition-all duration-300 hover:scale-105 active:scale-95">
+            <Button variant="ghost" className="text-[#6A7A95] hover:text-white hover:bg-[#2A4A7A]/20 rounded-2xl w-12 h-12 p-0">
               <Settings className="w-5 h-5" />
             </Button>
           </div>
         </div>
 
-        <div className={`flex-1 bg-gradient-to-br from-[#162035] to-[#1A2D4A] rounded-3xl relative overflow-hidden shadow-2xl shadow-black/50 border border-[#2A4A7A]/10 transition-all duration-700 ${
-          isEnding ? 'scale-90 opacity-0 blur-sm' : 'scale-100 opacity-100 blur-0'
-        }`}>
+        <div className="flex-1 bg-gradient-to-br from-[#162035] to-[#1A2D4A] rounded-3xl relative overflow-hidden shadow-2xl shadow-black/50 border border-[#2A4A7A]/10">
           
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxwYXRoIGQ9Ik0gMCAwIEwgMCA2MCBMIDYwIDYwIEwgNjAgMCBaIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoNDIsNzQsMTIyLDAuMDUpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjcGF0dGVybikiLz48L3N2Zz4=')] opacity-30"></div>
 
+          {/* Удалённое видео */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <div className="relative inline-block">
-                <div className="absolute inset-0 bg-gradient-to-r from-[#2A4A7A] to-[#8AB4F8] rounded-full blur-2xl opacity-20" />
-                <div className="absolute inset-0 rounded-full border border-[#2A4A7A]/20 animate-spin-slow" />
-                <Avatar className="w-32 h-32 mx-auto mb-3 border-2 border-[#2A4A7A]/30 shadow-2xl shadow-[#2A4A7A]/10 transition-all duration-500 hover:scale-105">
-                  <AvatarFallback className="bg-gradient-to-br from-[#2A4A7A] to-[#3A5A8A] text-white/90 text-4xl font-light">
-                    AK
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-              <p className="text-white/90 font-light text-lg">Alex Kim</p>
-              <p className="text-sm text-white/30 font-light">Participant</p>
-            </div>
-          </div>
-
-          <div className="absolute bottom-6 right-6 w-48 h-36 bg-[#1A2D4A] rounded-2xl border border-[#2A4A7A]/20 overflow-hidden shadow-2xl shadow-black/50 backdrop-blur-sm transition-all duration-300 hover:scale-105">
-            <div className="absolute inset-0 flex items-center justify-center">
+            {remoteStream ? (
+              <video
+                ref={remoteVideoRef}
+                autoPlay
+                playsInline
+                className="w-full h-full object-cover"
+              />
+            ) : (
               <div className="text-center">
-                <Avatar className="w-14 h-14 mx-auto mb-1 border border-[#2A4A7A]/30 transition-all duration-300 hover:scale-110">
-                  <AvatarFallback className="bg-[#0A1628] text-white/60 text-xl font-light">
-                    You
-                  </AvatarFallback>
-                </Avatar>
-                <p className="text-xs text-white/20 font-light">You</p>
-              </div>
-            </div>
-            {isMuted && (
-              <div className="absolute top-3 left-3">
-                <MicOff className="w-3 h-3 text-red-400" data-testid="mic-off-icon" />
+                <div className="relative inline-block">
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#2A4A7A] to-[#8AB4F8] rounded-full blur-2xl opacity-20" />
+                  <div className="absolute inset-0 rounded-full border border-[#2A4A7A]/20" />
+                  <Avatar className="w-32 h-32 mx-auto mb-3 border-2 border-[#2A4A7A]/30 shadow-2xl shadow-[#2A4A7A]/10">
+                    <AvatarFallback className="bg-gradient-to-br from-[#2A4A7A] to-[#3A5A8A] text-white/90 text-4xl font-light">
+                      AK
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+                <p className="text-white/90 font-light text-lg">Alex Kim</p>
+                <p className="text-sm text-white/30 font-light">
+                  {remoteStream ? 'В сети' : 'Ожидание соединения...'}
+                </p>
+                {!remoteStream && (
+                  <div className="mt-4 flex items-center gap-2 justify-center">
+                    <input
+                      type="text"
+                      placeholder="Введите ID собеседника"
+                      value={remoteId}
+                      onChange={(e) => setRemoteId(e.target.value)}
+                      className="bg-[#0A1628]/60 border border-[#2A4A7A]/30 rounded-xl px-4 py-2 text-sm text-white/90 placeholder:text-white/30 focus:outline-none focus:border-[#2A4A7A]/60"
+                    />
+                    <Button
+                      onClick={handleCall}
+                      className="bg-[#2A4A7A] hover:bg-[#3A5A8A] text-white rounded-xl px-4 py-2 text-sm"
+                    >
+                      Позвонить
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>
 
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 transition-all duration-700">
+          {/* Локальное видео (мини-окно) */}
+          <div className="absolute bottom-6 right-6 w-48 h-36 bg-[#1A2D4A] rounded-2xl border border-[#2A4A7A]/20 overflow-hidden shadow-2xl shadow-black/50 backdrop-blur-sm">
+            {localStream ? (
+              <video
+                ref={localVideoRef}
+                autoPlay
+                playsInline
+                muted
+                className={`w-full h-full object-cover transition-all duration-300 ${
+                  isVideoOff ? 'opacity-0' : 'opacity-100'
+                }`}
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <Avatar className="w-14 h-14 mx-auto mb-1 border border-[#2A4A7A]/30">
+                    <AvatarFallback className="bg-[#0A1628] text-white/60 text-xl font-light">
+                      You
+                    </AvatarFallback>
+                  </Avatar>
+                  <p className="text-xs text-white/20 font-light">You</p>
+                </div>
+              </div>
+            )}
+            {isMuted && (
+              <div className="absolute top-3 left-3">
+                <MicOff className="w-3 h-3 text-red-400" />
+              </div>
+            )}
+            {isVideoOff && (
+              <div className="absolute top-3 left-3">
+                <VideoOff className="w-3 h-3 text-red-400" />
+              </div>
+            )}
+          </div>
+
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
             <div className="flex items-center gap-3 p-2 bg-[#0A1628]/60 backdrop-blur-2xl rounded-2xl border border-[#2A4A7A]/20 shadow-2xl shadow-black/50">
               <Button
                 onClick={toggleMute}
-                data-testid="mic-button"
                 className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 ${
                   isMuted 
                     ? 'bg-red-500 hover:bg-red-600 text-white shadow-xl shadow-red-500/30' 
                     : 'bg-[#2A4A7A] text-white shadow-xl shadow-[#2A4A7A]/30'
                 }`}
               >
-                {isMuted ? <MicOff className="w-5 h-5" data-testid="mic-off-icon" /> : <Mic className="w-5 h-5" />}
+                {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                 {!isMuted && (
-                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full shadow-lg shadow-green-500/30 animate-pulse" />
+                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full shadow-lg shadow-green-500/30" />
                 )}
               </Button>
 
               <Button
                 onClick={toggleVideo}
-                data-testid="video-button"
                 className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 ${
                   isVideoOff 
                     ? 'bg-red-500 hover:bg-red-600 text-white shadow-xl shadow-red-500/30' 
                     : 'bg-[#2A4A7A] text-white shadow-xl shadow-[#2A4A7A]/30'
                 }`}
               >
-                {isVideoOff ? <VideoOff className="w-5 h-5" data-testid="video-off-icon" /> : <Video className="w-5 h-5" />}
+                {isVideoOff ? <VideoOff className="w-5 h-5" /> : <Video className="w-5 h-5" />}
                 {!isVideoOff && (
-                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full shadow-lg shadow-green-500/30 animate-pulse" />
+                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full shadow-lg shadow-green-500/30" />
                 )}
               </Button>
 
@@ -245,8 +314,7 @@ function ResearchCall() {
 
               <Button
                 onClick={handleEndCall}
-                data-testid="end-call-button"
-                className="w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 bg-red-500 hover:bg-red-600 text-white shadow-xl shadow-red-500/30 hover:shadow-red-500/50"
+                className="w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 bg-red-500 hover:bg-red-600 text-white shadow-xl shadow-red-500/30"
               >
                 <PhoneOff className="w-5 h-5" />
               </Button>
@@ -255,7 +323,7 @@ function ResearchCall() {
         </div>
       </div>
 
-      <div className="w-[400px] bg-[#162035] border-l border-[#2A4A7A]/10 flex flex-col backdrop-blur-sm relative z-10">
+      <div className="w-[400px] bg-[#162035] border-l border-[#2A4A7A]/10 flex flex-col backdrop-blur-sm">
         
         <div className="px-6 pt-6 pb-4 border-b border-[#2A4A7A]/10">
           <div className="flex gap-1 bg-[#0A1628]/40 p-1 rounded-2xl border border-[#2A4A7A]/10">
@@ -267,7 +335,6 @@ function ResearchCall() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                data-testid={`tab-${tab.id}`}
                 className={`
                   flex-1 py-3 rounded-xl text-xs font-light transition-all duration-300
                   ${activeTab === tab.id 
@@ -307,7 +374,7 @@ function ResearchCall() {
                   >
                     <div className="flex items-start gap-3">
                       {index === currentQuestion ? (
-                        <CheckCircle className="w-4 h-4 text-[#8AB4F8] flex-shrink-0 mt-0.5 animate-pulse" />
+                        <CheckCircle className="w-4 h-4 text-[#8AB4F8] flex-shrink-0 mt-0.5" />
                       ) : (
                         <Circle className="w-4 h-4 text-white/10 flex-shrink-0 mt-0.5" />
                       )}
@@ -319,7 +386,7 @@ function ResearchCall() {
                 ))}
               </div>
 
-              <Button className="w-full mt-5 bg-white/5 hover:bg-white/10 text-white/60 rounded-2xl py-3 text-sm font-light border border-white/5 transition-all duration-300 hover:scale-105 active:scale-95">
+              <Button className="w-full mt-5 bg-white/5 hover:bg-white/10 text-white/60 rounded-2xl py-3 text-sm font-light border border-white/5">
                 <Plus className="w-4 h-4 mr-2" />
                 Add question
               </Button>
@@ -347,7 +414,7 @@ function ResearchCall() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-2 text-red-400 text-xs font-light">
-                <span className="w-2 h-2 bg-red-500 rounded-full shadow-lg shadow-red-500/20 animate-pulse"></span>
+                <span className="w-2 h-2 bg-red-500 rounded-full shadow-lg shadow-red-500/20"></span>
                 Recording
               </span>
               <span className="text-xs text-white/15 font-mono">{formatTime(callTime)}</span>
@@ -372,21 +439,21 @@ function ResearchCall() {
       </div>
 
       {showEndConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="bg-[#162035] rounded-3xl border border-[#2A4A7A]/20 p-8 max-w-sm w-full shadow-2xl shadow-black/50 animate-scale-up">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-[#162035] rounded-3xl border border-[#2A4A7A]/20 p-8 max-w-sm w-full shadow-2xl shadow-black/50">
             <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 bg-red-500/10 rounded-2xl flex items-center justify-center border border-red-500/20 animate-pulse">
+              <div className="w-16 h-16 mx-auto mb-4 bg-red-500/10 rounded-2xl flex items-center justify-center border border-red-500/20">
                 <PhoneOff className="w-6 h-6 text-red-400" />
               </div>
-              <h3 className="text-lg font-light text-white/90 mb-1" data-testid="end-call-modal-title">Завершить звонок?</h3>
+              <h3 className="text-lg font-light text-white/90 mb-1">Завершить звонок?</h3>
               <p className="text-sm font-light text-white/20 mb-6">
                 Вы уверены, что хотите завершить звонок?
               </p>
               <div className="flex gap-3">
-                <Button onClick={cancelEndCall} className="flex-1 bg-white/5 hover:bg-white/10 text-white/60 rounded-2xl py-3 text-sm font-light border border-white/5 transition-all duration-300 hover:scale-105 active:scale-95">
+                <Button onClick={cancelEndCall} className="flex-1 bg-white/5 hover:bg-white/10 text-white/60 rounded-2xl py-3 text-sm font-light border border-white/5">
                   Отмена
                 </Button>
-                <Button onClick={confirmEndCall} className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-2xl py-3 text-sm font-light shadow-xl shadow-red-500/20 transition-all duration-300 hover:scale-105 active:scale-95">
+                <Button onClick={confirmEndCall} className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-2xl py-3 text-sm font-light shadow-xl shadow-red-500/20">
                   Завершить
                 </Button>
               </div>
