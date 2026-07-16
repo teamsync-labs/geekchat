@@ -1,7 +1,9 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from db.session import init_db, engine
-from routers.users import router as users_router
+from core.config import settings as s
+from api.v1.router import api_router
+from api.system.router import system_router
 
 
 @asynccontextmanager
@@ -16,13 +18,7 @@ async def lifespan(app: FastAPI):
     await engine.dispose()
     print('Database connection closed')
 
-app = FastAPI(title='GeekChat API', version='1.0.0', lifespan=lifespan)
-app.include_router(users_router)
 
-@app.get('/')
-async def read_root():
-    return {'message': 'Hello, this is Geek Chat API'}
-
-@app.get('/health')
-async def health_check():
-    return {'status': 'OK'}
+app = FastAPI(title=s.API_TITLE, version=s.API_VERSION, lifespan=lifespan)
+app.include_router(system_router)
+app.include_router(api_router, prefix='/api/v1')
