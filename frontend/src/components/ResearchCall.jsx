@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { usePeer } from '@/hooks/usePeer';
 import { 
   Mic, MicOff, Video, VideoOff, PhoneOff, 
   Volume2, VolumeX, 
@@ -12,8 +11,6 @@ import {
 } from 'lucide-react';
 
 function ResearchCall() {
-  const { myId, remoteStream, localStream, isReady, callPeer } = usePeer();
-  const [remoteId, setRemoteId] = useState('');
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(false);
@@ -25,39 +22,6 @@ function ResearchCall() {
   const [isEnding, setIsEnding] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const [isCallEnded, setIsCallEnded] = useState(false);
-
-  const localVideoRef = useRef(null);
-  const remoteVideoRef = useRef(null);
-
-  useEffect(() => {
-    if (localVideoRef.current && localStream) {
-      localVideoRef.current.srcObject = localStream;
-    }
-  }, [localStream]);
-
-  useEffect(() => {
-    if (remoteVideoRef.current && remoteStream) {
-      remoteVideoRef.current.srcObject = remoteStream;
-    }
-  }, [remoteStream]);
-
-  useEffect(() => {
-    if (localStream) {
-      const videoTrack = localStream.getVideoTracks()[0];
-      if (videoTrack) {
-        videoTrack.enabled = !isVideoOff;
-      }
-    }
-  }, [isVideoOff, localStream]);
-
-  useEffect(() => {
-    if (localStream) {
-      const audioTrack = localStream.getAudioTracks()[0];
-      if (audioTrack) {
-        audioTrack.enabled = !isMuted;
-      }
-    }
-  }, [isMuted, localStream]);
 
   useEffect(() => {
     if (isPaused || isEnding || isCallEnded) return;
@@ -88,12 +52,6 @@ function ResearchCall() {
     }, 800);
   };
   const cancelEndCall = () => setShowEndConfirm(false);
-
-  const handleCall = () => {
-    if (remoteId.trim()) {
-      callPeer(remoteId.trim());
-    }
-  };
 
   const questions = [
     "1. Tell me about a time you used our product.",
@@ -151,13 +109,8 @@ function ResearchCall() {
                 <Badge className="bg-[#2A4A7A]/20 text-[#8AB4F8] border border-[#2A4A7A]/30 rounded-xl px-3 py-1 text-[10px] font-light">
                   🔒 Encrypted
                 </Badge>
-                <Badge className="bg-green-500/20 text-green-400 border border-green-500/30 rounded-xl px-3 py-1 text-[10px] font-light">
-                  {isReady ? '✅ Online' : '⏳ Connecting...'}
-                </Badge>
               </div>
               <div className="flex items-center gap-4 text-sm mt-1">
-                <span className="text-white/70 font-light">Your ID: {myId || '...'}</span>
-                <span className="w-px h-4 bg-[#2A4A7A]/30"></span>
                 <span className="text-white/70 font-light">Interview – Alex Kim</span>
                 <span className="w-px h-4 bg-[#2A4A7A]/30"></span>
                 <span className="font-mono text-[#8AB4F8] font-light tracking-wider" data-testid="timer">
@@ -187,80 +140,40 @@ function ResearchCall() {
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxwYXRoIGQ9Ik0gMCAwIEwgMCA2MCBMIDYwIDYwIEwgNjAgMCBaIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoNDIsNzQsMTIyLDAuMDUpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjcGF0dGVybikiLz48L3N2Zz4=')] opacity-30"></div>
 
           <div className="absolute inset-0 flex items-center justify-center">
-            {remoteStream ? (
-              <video
-                ref={remoteVideoRef}
-                autoPlay
-                playsInline
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="text-center">
-                <div className="relative inline-block">
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#2A4A7A] to-[#8AB4F8] rounded-full blur-2xl opacity-20" />
-                  <div className="absolute inset-0 rounded-full border border-[#2A4A7A]/20" />
-                  <Avatar className="w-32 h-32 mx-auto mb-3 border-2 border-[#2A4A7A]/30 shadow-2xl shadow-[#2A4A7A]/10">
-                    <AvatarFallback className="bg-gradient-to-br from-[#2A4A7A] to-[#3A5A8A] text-white/90 text-4xl font-light">
-                      AK
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-                <p className="text-white/90 font-light text-lg">Alex Kim</p>
-                <p className="text-sm text-white/30 font-light">
-                  {remoteStream ? 'В сети' : 'Ожидание соединения...'}
-                </p>
-                {!remoteStream && (
-                  <div className="mt-4 flex items-center gap-2 justify-center">
-                    <input
-                      type="text"
-                      placeholder="Введите ID собеседника"
-                      value={remoteId}
-                      onChange={(e) => setRemoteId(e.target.value)}
-                      className="bg-[#0A1628]/60 border border-[#2A4A7A]/30 rounded-xl px-4 py-2 text-sm text-white/90 placeholder:text-white/30 focus:outline-none focus:border-[#2A4A7A]/60"
-                    />
-                    <Button
-                      onClick={handleCall}
-                      className="bg-[#2A4A7A] hover:bg-[#3A5A8A] text-white rounded-xl px-4 py-2 text-sm"
-                    >
-                      Позвонить
-                    </Button>
-                  </div>
-                )}
+            <div className="text-center">
+              <div className="relative inline-block">
+                <div className="absolute inset-0 bg-gradient-to-r from-[#2A4A7A] to-[#8AB4F8] rounded-full blur-2xl opacity-20" />
+                <div className="absolute inset-0 rounded-full border border-[#2A4A7A]/20" />
+                <Avatar className="w-32 h-32 mx-auto mb-3 border-2 border-[#2A4A7A]/30 shadow-2xl shadow-[#2A4A7A]/10">
+                  <AvatarFallback className="bg-gradient-to-br from-[#2A4A7A] to-[#3A5A8A] text-white/90 text-4xl font-light">
+                    AK
+                  </AvatarFallback>
+                </Avatar>
               </div>
-            )}
+              <p className="text-white/90 font-light text-lg">Alex Kim</p>
+              <p className="text-sm text-white/30 font-light">Participant</p>
+            </div>
           </div>
 
           <div className="absolute bottom-6 right-6 w-48 h-36 bg-[#1A2D4A] rounded-2xl border border-[#2A4A7A]/20 overflow-hidden shadow-2xl shadow-black/50 backdrop-blur-sm">
-            {localStream ? (
-              <video
-                ref={localVideoRef}
-                autoPlay
-                playsInline
-                muted
-                className={`w-full h-full object-cover transition-all duration-300 ${
-                  isVideoOff ? 'opacity-0' : 'opacity-100'
-                }`}
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <Avatar className="w-14 h-14 mx-auto mb-1 border border-[#2A4A7A]/30">
-                    <AvatarFallback className="bg-[#0A1628] text-white/60 text-xl font-light">
-                      You
-                    </AvatarFallback>
-                  </Avatar>
-                  <p className="text-xs text-white/20 font-light">You</p>
-                </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center">
+                <Avatar className="w-14 h-14 mx-auto mb-1 border border-[#2A4A7A]/30">
+                  <AvatarFallback className="bg-[#0A1628] text-white/60 text-xl font-light">
+                    You
+                  </AvatarFallback>
+                </Avatar>
+                <p className="text-xs text-white/20 font-light">You</p>
               </div>
-            )}
+            </div>
             {isMuted && (
               <div className="absolute top-3 left-3">
-                <MicOff className="w-3 h-3 text-red-400" />
+                <MicOff className="w-3 h-3 text-red-400" data-testid="mic-off-icon" />
               </div>
             )}
             {isVideoOff && (
               <div className="absolute top-3 left-3">
-                <VideoOff className="w-3 h-3 text-red-400" />
+                <VideoOff className="w-3 h-3 text-red-400" data-testid="video-off-icon" />
               </div>
             )}
           </div>
