@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +22,56 @@ function ResearchCall() {
   const [isEnding, setIsEnding] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   const [isCallEnded, setIsCallEnded] = useState(false);
+  const [stream, setStream] = useState(null);
+
+  const localVideoRef = useRef(null);
+
+  // ===== ЗАПРАШИВАЕМ КАМЕРУ =====
+  useEffect(() => {
+    async function startCamera() {
+      try {
+        const mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        });
+        setStream(mediaStream);
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = mediaStream;
+        }
+        console.log('✅ Камера и микрофон запущены!');
+      } catch (err) {
+        console.error('❌ Ошибка доступа к камере:', err);
+        alert('⚠️ Не удалось получить доступ к камере и микрофону. Проверьте разрешения в браузере.');
+      }
+    }
+    startCamera();
+
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
+
+  // ===== УПРАВЛЕНИЕ ВИДЕО =====
+  useEffect(() => {
+    if (stream) {
+      const videoTrack = stream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.enabled = !isVideoOff;
+      }
+    }
+  }, [isVideoOff, stream]);
+
+  // ===== УПРАВЛЕНИЕ МИКРОФОНОМ =====
+  useEffect(() => {
+    if (stream) {
+      const audioTrack = stream.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.enabled = !isMuted;
+      }
+    }
+  }, [isMuted, stream]);
 
   useEffect(() => {
     if (isPaused || isEnding || isCallEnded) return;
@@ -139,33 +189,61 @@ function ResearchCall() {
           
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxwYXRoIGQ9Ik0gMCAwIEwgMCA2MCBMIDYwIDYwIEwgNjAgMCBaIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoNDIsNzQsMTIyLDAuMDUpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjcGF0dGVybikiLz48L3N2Zz4=')] opacity-30"></div>
 
+          {/* ОСНОВНОЕ ВИДЕО */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <div className="relative inline-block">
-                <div className="absolute inset-0 bg-gradient-to-r from-[#2A4A7A] to-[#8AB4F8] rounded-full blur-2xl opacity-20" />
-                <div className="absolute inset-0 rounded-full border border-[#2A4A7A]/20" />
-                <Avatar className="w-32 h-32 mx-auto mb-3 border-2 border-[#2A4A7A]/30 shadow-2xl shadow-[#2A4A7A]/10">
-                  <AvatarFallback className="bg-gradient-to-br from-[#2A4A7A] to-[#3A5A8A] text-white/90 text-4xl font-light">
-                    AK
-                  </AvatarFallback>
-                </Avatar>
+            {stream ? (
+              <video
+                ref={localVideoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="text-center">
+                <div className="relative inline-block">
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#2A4A7A] to-[#8AB4F8] rounded-full blur-2xl opacity-20" />
+                  <div className="absolute inset-0 rounded-full border border-[#2A4A7A]/20" />
+                  <Avatar className="w-32 h-32 mx-auto mb-3 border-2 border-[#2A4A7A]/30 shadow-2xl shadow-[#2A4A7A]/10">
+                    <AvatarFallback className="bg-gradient-to-br from-[#2A4A7A] to-[#3A5A8A] text-white/90 text-4xl font-light">
+                      AK
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+                <p className="text-white/90 font-light text-lg">Alex Kim</p>
+                <p className="text-sm text-white/30 font-light">Participant</p>
               </div>
-              <p className="text-white/90 font-light text-lg">Alex Kim</p>
-              <p className="text-sm text-white/30 font-light">Participant</p>
-            </div>
+            )}
           </div>
 
+          {/* МИНИ-ОКНО (своё видео) */}
           <div className="absolute bottom-6 right-6 w-48 h-36 bg-[#1A2D4A] rounded-2xl border border-[#2A4A7A]/20 overflow-hidden shadow-2xl shadow-black/50 backdrop-blur-sm">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <Avatar className="w-14 h-14 mx-auto mb-1 border border-[#2A4A7A]/30">
-                  <AvatarFallback className="bg-[#0A1628] text-white/60 text-xl font-light">
-                    You
-                  </AvatarFallback>
-                </Avatar>
-                <p className="text-xs text-white/20 font-light">You</p>
+            {stream ? (
+              <video
+                ref={(el) => {
+                  if (el && stream) {
+                    el.srcObject = stream;
+                  }
+                }}
+                autoPlay
+                playsInline
+                muted
+                className={`w-full h-full object-cover transition-all duration-300 ${
+                  isVideoOff ? 'opacity-0' : 'opacity-100'
+                }`}
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <Avatar className="w-14 h-14 mx-auto mb-1 border border-[#2A4A7A]/30">
+                    <AvatarFallback className="bg-[#0A1628] text-white/60 text-xl font-light">
+                      You
+                    </AvatarFallback>
+                  </Avatar>
+                  <p className="text-xs text-white/20 font-light">You</p>
+                </div>
               </div>
-            </div>
+            )}
             {isMuted && (
               <div className="absolute top-3 left-3">
                 <MicOff className="w-3 h-3 text-red-400" data-testid="mic-off-icon" />
