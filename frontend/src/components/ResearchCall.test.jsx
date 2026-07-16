@@ -1,19 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-
-vi.mock('@/hooks/usePeer', () => ({
-  usePeer: () => ({
-    myId: 'test-id-123',
-    remoteStream: null,
-    localStream: null,
-    isReady: true,
-    error: null,
-    callPeer: () => {},
-    startMedia: () => {},
-  }),
-}));
-
 import ResearchCall from './ResearchCall';
 
 describe('ResearchCall', () => {
@@ -32,7 +19,9 @@ describe('ResearchCall', () => {
     render(<ResearchCall />);
     const micButton = screen.getByTestId('mic-button');
     await user.click(micButton);
-    expect(screen.getByTestId('mic-off-icon')).toBeInTheDocument();
+    // Ищем иконку ТОЛЬКО внутри кнопки
+    const micOffIcon = within(micButton).getByTestId('mic-off-icon');
+    expect(micOffIcon).toBeInTheDocument();
   });
 
   it('should toggle video when video button clicked', async () => {
@@ -40,7 +29,9 @@ describe('ResearchCall', () => {
     render(<ResearchCall />);
     const videoButton = screen.getByTestId('video-button');
     await user.click(videoButton);
-    expect(screen.getByTestId('video-off-icon')).toBeInTheDocument();
+    // Ищем иконку ТОЛЬКО внутри кнопки
+    const videoOffIcon = within(videoButton).getByTestId('video-off-icon');
+    expect(videoOffIcon).toBeInTheDocument();
   });
 
   it('should open end call modal when end button clicked', async () => {
