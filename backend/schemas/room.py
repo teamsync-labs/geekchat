@@ -1,7 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, computed_field
 from uuid import UUID
-from core.config import settings
+from core.config import settings as s
 from db.room_status import RoomStatus
 
 
@@ -19,7 +19,7 @@ class RoomJoinLinkResponse(BaseRoomResponse):
     @computed_field(return_type=str)
     @property
     def join_url(self):
-        return f'{settings.BASE_URL}/call/{self.room_id}'
+        return f'{s.FRONTEND_URL}/call/{self.room_id}'
 
 
 class RoomPreviewResponse(BaseRoomResponse):

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from schemas.user import UserCreate, UserResponse
 from api.deps.services import get_user_service
-from services.user_service import UserService
+from services.user import UserService
 
 
 router = APIRouter()

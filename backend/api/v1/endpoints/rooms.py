@@ -2,7 +2,7 @@ import uuid
 from fastapi import APIRouter, Depends, status, HTTPException
 from api.deps.services import get_room_service
 from schemas.room import RoomCreate, RoomPreviewResponse, RoomJoinLinkResponse
-from services.room_service import RoomService
+from services.room import RoomService
 
 
 router = APIRouter()
