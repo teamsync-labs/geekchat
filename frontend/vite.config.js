@@ -2,22 +2,24 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
-import { configDefaults } from 'vitest/config'
 
 export default defineConfig({
   plugins: [
     react(),
-    tailwindcss(), // ← ЭТОТ ПЛАГИН БЫЛ ПОТЕРЯН!
+    tailwindcss(),
   ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: './src/test/setup.js',
-    exclude: [...configDefaults.exclude, '**/e2e/**', '**/node_modules/**', '**/dist/**'],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://jsonplaceholder.typicode.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
   },
 })

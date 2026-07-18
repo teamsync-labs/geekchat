@@ -1,9 +1,9 @@
 import React from 'react';
 import './index.css';
-import ResearchCall from './components/ResearchCall';
+import ApiExample from './components/ApiExample';
 
 function App() {
-  return <ResearchCall />;
+  return <ApiExample />;
 }
 
 export default App;
