@@ -7,10 +7,15 @@ from signaling.schema import SignalMessage
 
 router = APIRouter()
 
-@router.websocket('/rooms/{room_id}')
-async def ws_room(websocket: WebSocket, room_id: UUID, user_id: int = 0):  # user Auth !!
-    if not await manager.check_connect_opportunity(room_id):
+@router.websocket('/rooms/{room_id}/{user_id}')
+async def ws_room(websocket: WebSocket, room_id: UUID, user_id: int):  # user Auth !!
+    if not manager.check_connect_opportunity(room_id):
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason='ROOM_IS_BUSY')
+
+        return
+
+    elif not manager.check_room_owner(room_id, user_id):
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason='CONNECT_IS_DENIED')
 
         return
 
@@ -46,4 +51,4 @@ async def ws_room(websocket: WebSocket, room_id: UUID, user_id: int = 0):  # use
 
     finally:
         manager.remove(room_id, user_id)
-        await manager.broadcast(room_id, {'type': 'peer-left', 'user_id': user_id})
+        await manager.broadcast(room_id, {'type': 'peer-left', 'user_id': user_id}, exclude_user_id=user_id)

@@ -4,6 +4,7 @@ from fastapi import WebSocket
 
 class ConnectionManager:
     MAX_UNITS = 2
+    GUEST_ID = 0
 
     def __init__(self):
         # {room_id: {user_id: WebSocket}}
@@ -13,7 +14,7 @@ class ConnectionManager:
     def connections(self):
         return self._connections
 
-    def add(self, websocket: WebSocket, room_id: UUID, user_id: int = 0):
+    def add(self, websocket: WebSocket, room_id: UUID, user_id: int):
         self._connections.setdefault(room_id, {})[user_id] = websocket
 
     def remove(self, room_id: UUID, user_id: int):
@@ -46,6 +47,12 @@ class ConnectionManager:
                 return True
 
         return False
+
+    def check_room_owner(self, room_id: UUID, user_id: int):
+        if user_id == ConnectionManager.GUEST_ID and room_id not in self.connections:
+            return False
+        else:
+            return True
 
 
 manager = ConnectionManager()
