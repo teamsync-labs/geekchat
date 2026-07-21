@@ -10,7 +10,7 @@ class UserService:
         self.db = db
 
     async def register(self, data: UserCreate) -> User | None:
-        existing_user = await self.get_by_email(data.email)
+        existing_user = await self._get_by_email(data.email)
 
         if existing_user is None:
             user = User(
@@ -27,7 +27,7 @@ class UserService:
         else:
             return None
 
-    async def get_by_email(self, email: str) -> User | None:
+    async def _get_by_email(self, email: str) -> User | None:
         stmt = select(User).where(User.email == email)
         result = await self.db.execute(stmt)
 

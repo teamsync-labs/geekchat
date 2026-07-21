@@ -40,7 +40,7 @@ async def ws_room(websocket: WebSocket, room_id: UUID, user_id: int):  # user Au
                 message={
                     'type': message.type,
                     'from_user_id': user_id,
-                    'payload': message.payload,
+                    'payload': message.payload
                 },
             )
             if not delivered:
