@@ -1,16 +1,62 @@
 @import "tailwindcss";
 
+:root {
+  --gc-bg: #0A1628;
+  --gc-surface: #162035;
+  --gc-accent: #8AB4F8;
+  --gc-text: #E8EDF5;
+  --gc-text-secondary: #8A9BB5;
+  --gc-border: #2A4A7A;
+}
+
 body {
   margin: 0;
   padding: 0;
-  background: #0A1628;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: var(--gc-bg);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ===== АНИМАЦИИ ===== */
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+/* ===== ПРЕМИАЛЬНЫЕ АНИМАЦИИ ===== */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes scale-up {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
 }
 
 @keyframes pulse {
@@ -18,87 +64,46 @@ body {
   50% { opacity: 0.5; }
 }
 
-.animate-spin-slow {
-  animation: spin-slow 20s linear infinite;
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-.animate-pulse {
-  animation: pulse 1.5s ease-in-out infinite;
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
 }
 
-/* ===== СКРОЛЛ ===== */
-::-webkit-scrollbar {
-  width: 2px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #2A4A7A;
-  border-radius: 100px;
+@keyframes call-end {
+  0% { opacity: 1; transform: scale(1) rotate(0deg); }
+  100% { opacity: 0; transform: scale(0.8) rotate(-3deg) translateY(-20px); }
 }
 
-/* ===== УСКОРЯЕМ ===== */
-* {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
+/* ===== КЛАССЫ ===== */
+.animate-fade-in { animation: fade-in 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+.animate-fade-up { animation: fade-up 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+.animate-slide-down { animation: slide-down 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+.animate-slide-up { animation: slide-up 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+.animate-slide-in { animation: slide-in 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+.animate-scale-in { animation: scale-in 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+.animate-scale-up { animation: scale-up 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-pulse { animation: pulse 2s ease-in-out infinite; }
+.animate-spin-slow { animation: spin-slow 20s linear infinite; }
+.animate-shimmer { animation: shimmer 4s linear infinite; background-size: 200% auto; }
+.animate-call-end { animation: call-end 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
 
-button, a, div {
-  will-change: transform, opacity;
-}
-
-/* ===== МАСШТАБЫ ===== */
-.hover\:scale-102:hover { transform: scale(1.02); }
-.hover\:scale-105:hover { transform: scale(1.05); }
-.hover\:scale-110:hover { transform: scale(1.10); }
-.active\:scale-90:active { transform: scale(0.9); }
-.active\:scale-95:active { transform: scale(0.95); }
-.scale-105 { transform: scale(1.05); }
-.scale-110 { transform: scale(1.10); }
-
-/* ===== АНИМАЦИЯ ДЛЯ ЗАВЕРШЕНИЯ ===== */
-@keyframes fade-out {
-  0% { opacity: 1; transform: scale(1); }
-  100% { opacity: 0; transform: scale(0.9) translateY(-20px); }
-}
-
-@keyframes scale-up {
-  0% { opacity: 0; transform: scale(0.8) translateY(20px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.2; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.05); }
-}
-
-@keyframes slide-down {
-  0% { opacity: 0; transform: translateY(-20px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade-out {
-  animation: fade-out 0.6s ease-out forwards;
-}
-
-.animate-scale-up {
-  animation: scale-up 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-.animate-slide-down {
-  animation: slide-down 0.4s ease-out forwards;
-}
-
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out forwards;
-}
-
+/* ===== ЗАДЕРЖКИ ===== */
 .delay-100 { animation-delay: 100ms; }
 .delay-200 { animation-delay: 200ms; }
 .delay-300 { animation-delay: 300ms; }
 .delay-500 { animation-delay: 500ms; }
+
+/* ===== СКРОЛЛ ===== */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2A4A7A; border-radius: 100px; }
+
+/* ===== УСКОРЯЕМ ===== */
+* { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+button, a, div { will-change: transform, opacity; }
