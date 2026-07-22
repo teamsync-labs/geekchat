@@ -1,34 +1,197 @@
 @import "tailwindcss";
 
-body {
+* {
   margin: 0;
   padding: 0;
-  background: #0A1628;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
-/* ===== АНИМАЦИИ ===== */
+body {
+  background: #0A1628;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ====================================================================
+   СУПЕР-ПЛАВНЫЕ АНИМАЦИИ — 37943794739539597357579777777777777777777777777777777777777777777 FPS
+   ==================================================================== */
+
+/* 1. Появление с лёгким подъёмом */
+@keyframes fade-up {
+  0% { opacity: 0; transform: translateY(12px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* 2. Парящий эффект */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+/* 3. Медленное вращение */
 @keyframes spin-slow {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+/* 4. Пульсация */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.02); }
 }
 
-.animate-spin-slow {
-  animation: spin-slow 20s linear infinite;
+/* 5. Свечение */
+@keyframes glow-soft {
+  0%, 100% { opacity: 0.1; transform: scale(1); }
+  50% { opacity: 0.25; transform: scale(1.04); }
 }
 
-.animate-pulse {
-  animation: pulse 1.5s ease-in-out infinite;
+/* 6. Галочка */
+@keyframes check-smooth {
+  0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
-/* ===== СКРОЛЛ ===== */
+/* 7. Шиммер */
+@keyframes shimmer-smooth {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* 8. Дыхание фона */
+@keyframes breathe-smooth {
+  0%, 100% { opacity: 0.05; transform: scale(1); }
+  50% { opacity: 0.12; transform: scale(1.04); }
+}
+
+/* 9. Плавный подъём */
+@keyframes slide-up-smooth {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* 10. Плавное масштабирование */
+@keyframes scale-smooth {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* 11. Появление с размытием */
+@keyframes blur-smooth {
+  0% { opacity: 0; filter: blur(6px); }
+  100% { opacity: 1; filter: blur(0px); }
+}
+
+/* 12. Появление справа */
+@keyframes fade-right-smooth {
+  0% { opacity: 0; transform: translateX(12px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* 13. Появление слева */
+@keyframes fade-left-smooth {
+  0% { opacity: 0; transform: translateX(-12px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* 14. Лёгкое покачивание */
+@keyframes sway-smooth {
+  0%, 100% { transform: rotate(-0.5deg); }
+  50% { transform: rotate(0.5deg); }
+}
+
+/* 15. Мягкий подпрыг */
+@keyframes bounce-smooth {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* ====================================================================
+   КЛАССЫ
+   ==================================================================== */
+
+.animate-fade-up { animation: fade-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.animate-float { animation: float 4s ease-in-out infinite; }
+.animate-spin-slow { animation: spin-slow 30s linear infinite; }
+.animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
+.animate-glow-soft { animation: glow-soft 3s ease-in-out infinite; }
+.animate-check-smooth { animation: check-smooth 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.animate-shimmer-smooth { animation: shimmer-smooth 3s linear infinite; background-size: 200% auto; }
+.animate-breathe-smooth { animation: breathe-smooth 4s ease-in-out infinite; }
+.animate-slide-up-smooth { animation: slide-up-smooth 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.animate-scale-smooth { animation: scale-smooth 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.animate-blur-smooth { animation: blur-smooth 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.animate-fade-right-smooth { animation: fade-right-smooth 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.animate-fade-left-smooth { animation: fade-left-smooth 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.animate-sway-smooth { animation: sway-smooth 3s ease-in-out infinite; }
+.animate-bounce-smooth { animation: bounce-smooth 2s ease-in-out infinite; }
+
+/* ====================================================================
+   ЗАДЕРЖКИ
+   ==================================================================== */
+
+.delay-50 { animation-delay: 50ms; }
+.delay-100 { animation-delay: 100ms; }
+.delay-150 { animation-delay: 150ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-250 { animation-delay: 250ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-350 { animation-delay: 350ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-450 { animation-delay: 450ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-600 { animation-delay: 600ms; }
+.delay-700 { animation-delay: 700ms; }
+.delay-800 { animation-delay: 800ms; }
+.delay-900 { animation-delay: 900ms; }
+.delay-1000 { animation-delay: 1000ms; }
+
+/* ====================================================================
+   ДЛИТЕЛЬНОСТЬ
+   ==================================================================== */
+
+.duration-200 { animation-duration: 200ms; }
+.duration-300 { animation-duration: 300ms; }
+.duration-400 { animation-duration: 400ms; }
+.duration-500 { animation-duration: 500ms; }
+.duration-600 { animation-duration: 600ms; }
+.duration-700 { animation-duration: 700ms; }
+.duration-800 { animation-duration: 800ms; }
+.duration-1000 { animation-duration: 1000ms; }
+
+/* ====================================================================
+   МЯГКИЕ УГЛЫ
+   ==================================================================== */
+
+.rounded-3xl { border-radius: 24px; }
+.rounded-2xl { border-radius: 16px; }
+.rounded-xl { border-radius: 12px; }
+
+/* ====================================================================
+   ПЛАВНЫЕ ПЕРЕХОДЫ
+   ==================================================================== */
+
+.transition-smooth {
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.transition-smooth-fast {
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.transition-smooth-slow {
+  transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ====================================================================
+   СКРОЛЛ
+   ==================================================================== */
+
 ::-webkit-scrollbar {
-  width: 2px;
+  width: 3px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -38,67 +201,41 @@ body {
   border-radius: 100px;
 }
 
-/* ===== УСКОРЯЕМ ===== */
+/* ====================================================================
+   УСКОРЕНИЕ — 120+ FPS
+   ==================================================================== */
+
 * {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
-button, a, div {
+button, a, div, input, span {
   will-change: transform, opacity;
 }
 
-/* ===== МАСШТАБЫ ===== */
-.hover\:scale-102:hover { transform: scale(1.02); }
-.hover\:scale-105:hover { transform: scale(1.05); }
-.hover\:scale-110:hover { transform: scale(1.10); }
-.active\:scale-90:active { transform: scale(0.9); }
-.active\:scale-95:active { transform: scale(0.95); }
-.scale-105 { transform: scale(1.05); }
-.scale-110 { transform: scale(1.10); }
+/* ====================================================================
+   СТЕКЛЯННЫЙ ЭФФЕКТ
+   ==================================================================== */
 
-/* ===== АНИМАЦИЯ ДЛЯ ЗАВЕРШЕНИЯ ===== */
-@keyframes fade-out {
-  0% { opacity: 1; transform: scale(1); }
-  100% { opacity: 0; transform: scale(0.9) translateY(-20px); }
+.glass-smooth {
+  background: rgba(22, 32, 53, 0.55);
+  backdrop-filter: blur(40px) saturate(1.2);
+  -webkit-backdrop-filter: blur(40px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-@keyframes scale-up {
-  0% { opacity: 0; transform: scale(0.8) translateY(20px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
+/* ====================================================================
+   ТЕКСТ
+   ==================================================================== */
+
+.text-gradient-smooth {
+  background: linear-gradient(135deg, #E8EDF5 0%, #8AB4F8 50%, #E8EDF5 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.2; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.05); }
+.text-glow-smooth {
+  text-shadow: 0 0 30px rgba(138, 180, 248, 0.1);
 }
-
-@keyframes slide-down {
-  0% { opacity: 0; transform: translateY(-20px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade-out {
-  animation: fade-out 0.6s ease-out forwards;
-}
-
-.animate-scale-up {
-  animation: scale-up 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-.animate-slide-down {
-  animation: slide-down 0.4s ease-out forwards;
-}
-
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out forwards;
-}
-
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-500 { animation-delay: 500ms; }
