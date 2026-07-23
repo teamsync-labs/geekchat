@@ -8,6 +8,7 @@ import {
   FileText, Clock, Users, CheckCircle, Circle,
   Play, Pause, SkipForward, SkipBack,
   ArrowLeft, Share2, Settings, Plus,
+  Home
 } from 'lucide-react';
 
 function ResearchCall({ onGoHome }) {
@@ -24,6 +25,7 @@ function ResearchCall({ onGoHome }) {
   const [isEnding, setIsEnding] = useState(false);
   const [stream, setStream] = useState(null);
   const videoRef = useRef(null);
+  const [particles, setParticles] = useState([]);
 
   useEffect(() => {
     const getMedia = async () => {
@@ -62,22 +64,38 @@ function ResearchCall({ onGoHome }) {
     return () => clearInterval(timer);
   }, [isPaused, isEnding, isCallEnded]);
 
+  useEffect(() => {
+    if (!isCallEnded) return;
+    const newParticles = Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 3 + 1,
+      speedX: (Math.random() - 0.5) * 0.3,
+      speedY: (Math.random() - 0.5) * 0.3 + 0.1,
+      opacity: Math.random() * 0.3 + 0.1,
+    }));
+    setParticles(newParticles);
+
+    const animateParticles = () => {
+      setParticles(prev => prev.map(p => ({
+        ...p,
+        x: (p.x + p.speedX + 100) % 100,
+        y: (p.y + p.speedY + 100) % 100,
+      })));
+      requestAnimationFrame(animateParticles);
+    };
+    const animationId = requestAnimationFrame(animateParticles);
+    return () => cancelAnimationFrame(animationId);
+  }, [isCallEnded]);
+
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
-    if (stream) {
-      const audioTrack = stream.getAudioTracks()[0];
-      if (audioTrack) {
-        audioTrack.enabled = isMuted;
-      }
-    }
-  };
-
+  const toggleMute = () => setIsMuted(!isMuted);
   const toggleVideo = () => setIsVideoOff(!isVideoOff);
   const toggleSpeaker = () => setIsSpeakerOn(!isSpeakerOn);
   const togglePause = () => setIsPaused(!isPaused);
@@ -108,17 +126,39 @@ function ResearchCall({ onGoHome }) {
 
   if (isCallEnded) {
     return (
-      <div className="min-h-screen bg-[#0A1628] flex items-center justify-center p-4">
-        <div className="text-center max-w-md w-full">
-          <div className="text-6xl mb-4">📞</div>
-          <h2 className="text-2xl font-light text-white/90 mb-2">Звонок завершён</h2>
-          <p className="text-[#8A9BB5] font-mono text-lg">{formatTime(callTime)}</p>
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[#0A1628] relative overflow-hidden">
+        {particles.map(p => (
+          <div
+            key={p.id}
+            className="absolute rounded-full bg-[#8AB4F8]"
+            style={{
+              left: `${p.x}%`,
+              top: `${p.y}%`,
+              width: p.size,
+              height: p.size,
+              opacity: p.opacity,
+              transition: 'all 0.1s linear',
+            }}
+          />
+        ))}
+        <div className="flex flex-col items-center max-w-sm w-full relative z-10">
+          <div className="relative w-32 h-32 mb-5">
+            <div className="absolute inset-[-12px] rounded-full border-2 border-[#2A4A7A]/20 animate-spin-slow"></div>
+            <div className="absolute inset-[-20px] rounded-full border-2 border-[#8AB4F8]/10 animate-spin-slow delay-500"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-[#2A4A7A] to-[#8AB4F8] rounded-full blur-2xl opacity-25 animate-pulse-ring"></div>
+            <div className="absolute inset-0 bg-[#1A2D4A] rounded-full border border-[#2A4A7A]/30 flex items-center justify-center shadow-2xl shadow-[#2A4A7A]/20">
+              <span className="text-5xl">📞</span>
+            </div>
+          </div>
+          <h2 className="text-2xl font-light text-white/90 mb-1">Звонок завершён</h2>
+          <p className="text-[#8A9BB5] font-mono text-lg mb-1">{formatTime(callTime)}</p>
           <p className="text-[#6A7A95] text-sm font-light mb-6">Спасибо за отличный разговор!</p>
           <Button 
-            onClick={() => window.location.reload()}
-            className="bg-[#2A4A7A] hover:bg-[#3A5A8A] text-white rounded-2xl px-10 py-3 text-sm font-light shadow-xl shadow-[#2A4A7A]/20 transition-all duration-300 hover:scale-105 active:scale-95"
+            onClick={onGoHome}
+            className="bg-gradient-to-r from-[#2A4A7A] to-[#3A5A8A] hover:from-[#3A5A8A] hover:to-[#4A6A9A] text-white rounded-2xl px-8 py-3 text-sm font-light shadow-xl shadow-[#2A4A7A]/20 transition-all duration-300 hover:scale-105 active:scale-95"
           >
-            Новый звонок
+            <Home className="w-4 h-4 mr-2" />
+            На главную
           </Button>
         </div>
       </div>
@@ -128,7 +168,7 @@ function ResearchCall({ onGoHome }) {
   if (isEnding) {
     return (
       <div className="min-h-screen bg-[#0A1628] flex items-center justify-center p-4">
-        <div className="text-center animate-scale-up">
+        <div className="text-center">
           <div className="text-5xl mb-4">📞</div>
           <p className="text-white/40 font-light">Завершение звонка...</p>
         </div>
@@ -207,7 +247,7 @@ function ResearchCall({ onGoHome }) {
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="text-center">
               <div className="relative inline-block">
-                <div className="absolute inset-0 bg-gradient-to-r from-[#2A4A7A] to-[#8AB4F8] rounded-full blur-2xl opacity-20 animate-pulse" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#2A4A7A] to-[#8AB4F8] rounded-full blur-2xl opacity-20" />
                 <Avatar className="w-32 h-32 mx-auto mb-3 border-2 border-[#2A4A7A]/30">
                   <AvatarFallback className="bg-[#2A4A7A] text-white/90 text-4xl font-light">
                     AK
@@ -407,8 +447,8 @@ function ResearchCall({ onGoHome }) {
       </div>
 
       {showEndConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="bg-[#162035] rounded-3xl border border-[#2A4A7A]/20 p-8 max-w-sm w-full shadow-2xl shadow-black/50 animate-scale-up">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-[#162035] rounded-3xl border border-[#2A4A7A]/20 p-8 max-w-sm w-full shadow-2xl shadow-black/50">
             <div className="text-center">
               <div className="w-16 h-16 mx-auto mb-4 bg-red-500/10 rounded-2xl flex items-center justify-center border border-red-500/20">
                 <PhoneOff className="w-6 h-6 text-red-400" />
@@ -418,10 +458,10 @@ function ResearchCall({ onGoHome }) {
                 Вы уверены, что хотите завершить звонок?
               </p>
               <div className="flex gap-3">
-                <Button onClick={cancelEndCall} className="flex-1 bg-white/5 hover:bg-white/10 text-white/60 rounded-2xl py-3 text-sm font-light border border-white/5 transition-all duration-300 hover:scale-105 active:scale-95">
+                <Button onClick={cancelEndCall} className="flex-1 bg-white/5 hover:bg-white/10 text-white/60 rounded-2xl py-3 text-sm font-light border border-white/5">
                   Отмена
                 </Button>
-                <Button onClick={confirmEndCall} className="flex-1 bg-red-500 hover:bg-red-600 text-white rounded-2xl py-3 text-sm font-light shadow-xl shadow-red-500/20 transition-all duration-300 hover:scale-105 active:scale-95">
+                <Button onClick={confirmEndCall} className="flex-1 bg-red-500 hover:bg-red-600 text-white rounded-2xl py-3 text-sm font-light shadow-xl shadow-red-500/20">
                   Завершить
                 </Button>
               </div>
