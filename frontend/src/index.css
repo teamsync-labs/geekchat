@@ -1,104 +1,182 @@
 @import "tailwindcss";
 
-body {
+* {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  backface-visibility: hidden;
+}
+
+body {
   background: #0A1628;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ===== БАЗОВЫЙ ПРЕМИАЛЬНЫЙ ФОН ===== */
+.bg-premium {
+  position: relative;
+  overflow: hidden;
+  background: #0A1628;
+}
+
+.bg-premium::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse at 20% 50%, rgba(42,74,122,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse at 80% 50%, rgba(138,180,248,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ===== ЧАСТИЦЫ ===== */
+.particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(138, 180, 248, 0.15);
+  animation: float-particle linear infinite;
+}
+
+@keyframes float-particle {
+  0% { transform: translateY(0px) translateX(0px) scale(1); opacity: 0.1; }
+  25% { transform: translateY(-30px) translateX(20px) scale(1.2); opacity: 0.3; }
+  50% { transform: translateY(-60px) translateX(-10px) scale(0.8); opacity: 0.15; }
+  75% { transform: translateY(-30px) translateX(30px) scale(1.1); opacity: 0.25; }
+  100% { transform: translateY(0px) translateX(0px) scale(1); opacity: 0.1; }
 }
 
 /* ===== АНИМАЦИИ ===== */
+@keyframes fade-in {
+  from { opacity: 0; transform: scale(0.96) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(2deg); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes pulse-ring {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(1.05); }
+}
+
 @keyframes spin-slow {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.animate-spin-slow {
-  animation: spin-slow 20s linear infinite;
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-.animate-pulse {
-  animation: pulse 1.5s ease-in-out infinite;
+@keyframes breathe {
+  0%, 100% { box-shadow: 0 0 20px rgba(138,180,248,0.05); }
+  50% { box-shadow: 0 0 40px rgba(138,180,248,0.15); }
 }
 
-/* ===== СКРОЛЛ ===== */
-::-webkit-scrollbar {
-  width: 2px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #2A4A7A;
-  border-radius: 100px;
-}
-
-/* ===== УСКОРЯЕМ ===== */
-* {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-button, a, div {
-  will-change: transform, opacity;
-}
-
-/* ===== МАСШТАБЫ ===== */
-.hover\:scale-102:hover { transform: scale(1.02); }
-.hover\:scale-105:hover { transform: scale(1.05); }
-.hover\:scale-110:hover { transform: scale(1.10); }
-.active\:scale-90:active { transform: scale(0.9); }
-.active\:scale-95:active { transform: scale(0.95); }
-.scale-105 { transform: scale(1.05); }
-.scale-110 { transform: scale(1.10); }
-
-/* ===== АНИМАЦИЯ ДЛЯ ЗАВЕРШЕНИЯ ===== */
-@keyframes fade-out {
-  0% { opacity: 1; transform: scale(1); }
-  100% { opacity: 0; transform: scale(0.9) translateY(-20px); }
-}
-
-@keyframes scale-up {
-  0% { opacity: 0; transform: scale(0.8) translateY(20px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { opacity: 0.2; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.05); }
-}
-
-@keyframes slide-down {
-  0% { opacity: 0; transform: translateY(-20px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade-out {
-  animation: fade-out 0.6s ease-out forwards;
-}
-
-.animate-scale-up {
-  animation: scale-up 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-.animate-slide-down {
-  animation: slide-down 0.4s ease-out forwards;
-}
-
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out forwards;
-}
+/* ===== КЛАССЫ ===== */
+.animate-fade-in { animation: fade-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.animate-fade-up { animation: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.animate-float { animation: float 4s ease-in-out infinite; }
+.animate-shimmer { animation: shimmer 3s linear infinite; background-size: 200% auto; }
+.animate-pulse-ring { animation: pulse-ring 2s ease-in-out infinite; }
+.animate-spin-slow { animation: spin-slow 30s linear infinite; }
+.animate-slide-up { animation: slide-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.animate-scale-in { animation: scale-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.animate-breathe { animation: breathe 3s ease-in-out infinite; }
 
 .delay-100 { animation-delay: 100ms; }
 .delay-200 { animation-delay: 200ms; }
 .delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
 .delay-500 { animation-delay: 500ms; }
+
+/* ===== СТЕКЛЯННЫЙ ЭФФЕКТ ===== */
+.glass-premium {
+  background: rgba(22, 32, 53, 0.6);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(138, 180, 248, 0.06);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+}
+
+.glass-premium-light {
+  background: rgba(22, 32, 53, 0.3);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(138, 180, 248, 0.04);
+}
+
+/* ===== ПРЕМИАЛЬНЫЕ КНОПКИ ===== */
+.btn-premium {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-premium::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.btn-premium:hover::after {
+  opacity: 1;
+}
+
+.btn-premium:active {
+  transform: scale(0.97);
+}
+
+.btn-premium .shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  transition: left 0.6s ease;
+}
+
+.btn-premium:hover .shine {
+  left: 100%;
+}
+
+/* ===== СКРОЛЛ ===== */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { 
+  background: linear-gradient(to bottom, #2A4A7A, #8AB4F8);
+  border-radius: 100px;
+}
+
+button, a, div { will-change: transform, opacity; }
