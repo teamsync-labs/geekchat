@@ -3,9 +3,6 @@ from fastapi import WebSocket
 
 
 class ConnectionManager:
-    MAX_UNITS = 2
-    GUEST_ID = 0
-
     def __init__(self):
         # {room_id: {user_id: WebSocket}}
         self._connections: dict[UUID, dict[int, WebSocket]] = {}
@@ -32,12 +29,6 @@ class ConnectionManager:
             if user_id != exclude_user_id:
                 await ws.send_json(message)
 
-    def check_connect_opportunity(self, room_id: UUID):
-        if len(self.connections.get(room_id, {})) < ConnectionManager.MAX_UNITS:
-            return True
-        else:
-            return False
-
     async def send_to_peer(self, room_id: UUID, sender_id: int, message: dict):
         room = self.connections.get(room_id, {})
         for user_id, ws in room.items():
@@ -47,12 +38,6 @@ class ConnectionManager:
                 return True
 
         return False
-
-    def check_room_owner(self, room_id: UUID, user_id: int):
-        if user_id == ConnectionManager.GUEST_ID and room_id not in self.connections:
-            return False
-        else:
-            return True
 
 
 manager = ConnectionManager()

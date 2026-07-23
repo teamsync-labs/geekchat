@@ -34,7 +34,7 @@ async def test_get_existing_room_returns_200(client, mock_room_service):
         'created_at': datetime.now(timezone.utc)
     }
 
-    mock_room_service.check_is_room_joinable.return_value = True
+    mock_room_service.check_room_joinable.return_value = True
 
     response = await client.get(f"{ROOMS_URL}/{room_id}")
 
@@ -43,7 +43,7 @@ async def test_get_existing_room_returns_200(client, mock_room_service):
     assert body['room_id'] == str(room_id)
 
     mock_room_service.get_room_by_id.assert_awaited_once()
-    mock_room_service.check_is_room_joinable.assert_awaited_once()
+    mock_room_service.check_room_joinable.assert_awaited_once()
 
 @pytest.mark.asyncio
 async def test_get_unknown_room_returns_404(client, mock_room_service):
@@ -56,4 +56,4 @@ async def test_get_unknown_room_returns_404(client, mock_room_service):
     assert response.status_code == 404
 
     mock_room_service.get_room_by_id.assert_awaited_once()
-    mock_room_service.check_is_room_joinable.assert_not_awaited()
+    mock_room_service.check_room_joinable.assert_not_awaited()

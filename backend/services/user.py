@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.user import User
 from schemas.user import UserCreate
@@ -9,7 +9,7 @@ class UserService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def register(self, data: UserCreate) -> User | None:
+    async def register(self, data: UserCreate):
         existing_user = await self._get_by_email(data.email)
 
         if existing_user is None:
@@ -27,7 +27,13 @@ class UserService:
         else:
             return None
 
-    async def _get_by_email(self, email: str) -> User | None:
+    async def get_count_users(self):
+        stmt = select(func.count()).select_from(User)
+        result = await self.db.execute(stmt)
+
+        return result.scalar_one()
+
+    async def _get_by_email(self, email: str):
         stmt = select(User).where(User.email == email)
         result = await self.db.execute(stmt)
 
