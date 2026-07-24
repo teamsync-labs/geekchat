@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from api.deps.services import get_room_service
 from schemas.room import RoomCreate, RoomPreviewResponse, RoomJoinLinkResponse
 from services.room import RoomService
+from core.error_codes import CODE_9001
 
 
 router = APIRouter()
@@ -17,11 +18,11 @@ async def check_room_availability(room_id: UUID, service: RoomService = Depends(
     room = await service.get_room_by_id(room_id)
 
     if room is None:
-        raise HTTPException(status_code=404, detail='ROOM_NOT_FOUND')
+        raise HTTPException(status_code=404, detail=CODE_9001)
 
-    availability = await service.check_room_joinable(room)
+    availability_status = await service.check_room_joinable(room)
 
-    if availability is not True:
-        raise HTTPException(status_code=410, detail=availability)
+    if availability_status is not True:
+        raise HTTPException(status_code=410, detail=availability_status)
 
     return room

@@ -1,10 +1,11 @@
 from datetime import datetime, timezone, timedelta
-from sqlalchemy import select, func
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.encoders import jsonable_encoder
 from models.room import Room
 from schemas.room import RoomCreate
 from db.room_status import RoomStatus
+from core.error_codes import CODE_9002, CODE_9003
 
 
 class RoomService:
@@ -32,12 +33,12 @@ class RoomService:
     @staticmethod
     async def check_room_joinable(room: Room):
         if room.status == RoomStatus.ENDED:
-            return jsonable_encoder( {'code': 'ROOM_INACTIVE'} )   # maybe status's enum class ???
+            return jsonable_encoder({'code': CODE_9002})
 
         elif datetime.now(timezone.utc) > room.expires_at:
             return jsonable_encoder( {
-                'code': 'ROOM_TIME_EXPIRED',
-                'expires_at': room.expires_at
+                'code': CODE_9003,
+                'expired_at': room.expires_at
             } )
 
         else:
