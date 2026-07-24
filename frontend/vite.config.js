@@ -13,17 +13,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  server: {
-    proxy: {
-      '/api': {
-        target: 'https://jsonplaceholder.typicode.com',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-    },
-  },
   preview: {
     port: 4174,
     strictPort: true,
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.js',
   },
 })
