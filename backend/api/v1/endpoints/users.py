@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from schemas.user import UserCreate, UserResponse
 from api.deps.services import get_user_service
-from services.user_service import UserService
+from services.user import UserService
+from core.error_codes import CODE_5001
 
 
 router = APIRouter()
@@ -13,4 +14,4 @@ async def register(data: UserCreate, service: UserService = Depends(get_user_ser
     if user is not None:
         return user
     else:
-        raise HTTPException(status_code=400, detail='User exists')
+        raise HTTPException(status_code=400, detail=CODE_5001)
