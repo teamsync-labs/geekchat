@@ -30,15 +30,15 @@ async def ws_room(websocket: WebSocket, room_id: UUID, user_id: int,
 
     await websocket.accept()
 
-    join_status, error_code = await manager.try_join(room_id, user_id, websocket,
-                                                     creator_id=creator_id, total_users=total_users)
+    join_status, error_code, session_id = await manager.try_join(room_id, user_id, websocket,
+                                                                 creator_id=creator_id, total_users=total_users)
 
     if not join_status:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason=error_code)
 
         return
 
-    await manager.broadcast(room_id, {'type': 'peer-joined', 'user_id': user_id}, exclude_user_id=user_id)
+    await manager.broadcast(room_id, {'type': 'peer-joined', 'user_id': user_id}, exclude_session_id=session_id)
 
     try:
         while True:
@@ -52,8 +52,7 @@ async def ws_room(websocket: WebSocket, room_id: UUID, user_id: int,
                 continue
 
             delivered = await manager.send_to_peer(
-                room_id,
-                sender_id=user_id,
+                room_id, sender_session_id=session_id,
                 message={
                     'type': message.type,
                     'from_user_id': user_id,
@@ -67,6 +66,6 @@ async def ws_room(websocket: WebSocket, room_id: UUID, user_id: int,
         pass
 
     finally:
-        manager.remove(room_id, user_id, websocket)
+        manager.remove(room_id, session_id)
 
-        await manager.broadcast(room_id, {'type': 'peer-left', 'user_id': user_id}, exclude_user_id=user_id)
+        await manager.broadcast(room_id, {'type': 'peer-left', 'user_id': user_id}, exclude_session_id=session_id)

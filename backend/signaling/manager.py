@@ -1,4 +1,5 @@
 # 'manager.py' - менеджер подключений к комнатам.
+import uuid
 from uuid import UUID
 from fastapi import WebSocket
 import asyncio
@@ -11,7 +12,8 @@ class ConnectionManager:
     NONE_PEERS_IN_ROOM = 0
 
     def __init__(self):
-        self.connections: dict[UUID, dict[int, WebSocket]] = {}
+        # room_id -> {session_id: {"websocket": WebSocket, "user_id": int}}
+        self.connections: dict[UUID, dict[UUID, dict]] = {}
         self.lock = asyncio.Lock()
 
     async def try_join(self, room_id: UUID, user_id: int, websocket: WebSocket,
@@ -20,52 +22,49 @@ class ConnectionManager:
         async with self.lock:
             if user_id != ConnectionManager.GUEST_ID:
                 if creator_id != user_id:
-                    return False, CODE_5002
+                    return False, CODE_5002, None
             else:
                 if room_id not in self.connections:
-                    return False, CODE_7002
+                    return False, CODE_7002, None
 
             peers = self.connections.get(room_id, {})
             is_room_empty = len(peers) == ConnectionManager.NONE_PEERS_IN_ROOM
 
             if is_room_empty and len(self.connections) >= total_users:
-                return False, CODE_7001
+                return False, CODE_7001, None
 
-            is_reconnect = user_id in peers
-            if not is_reconnect and len(peers) >= ConnectionManager.MAX_UNITS:
-                return False, CODE_9004
+            if len(peers) >= ConnectionManager.MAX_UNITS:
+                return False, CODE_9004, None
 
-            old_websocket = peers.get(user_id)
-            if old_websocket is not None and old_websocket is not websocket:
-                await old_websocket.close(code=4009, reason='RECONNECTED')   # create class state codes ??
-                print(f'{user_id} reconnected')
+            session_id = uuid.uuid4()
+            self.connections.setdefault(room_id, {})[session_id] = {
+                'websocket': websocket,
+                'user_id': user_id
+            }
 
-            self.connections.setdefault(room_id, {})[user_id] = websocket
+            return True, None, session_id
 
-            return True, None
+    def remove(self, room_id: UUID, session_id: UUID) -> None:
+        room = self.connections.get(room_id)
 
-    def remove(self, room_id: UUID, user_id: int, websocket: WebSocket):
-        peers = self.connections.get(room_id)
-
-        if peers is None:
+        if room is None:
             return
 
-        if peers.get(user_id) is websocket:
-            del peers[user_id]
+        room.pop(session_id, None)
 
-        if not peers:
-            self.connections.pop(room_id, None)
+        if not room:
+            del self.connections[room_id]
 
-    async def broadcast(self, room_id: UUID, message: dict, exclude_user_id: int):
-        for user_id, ws in self.connections.get(room_id, {}).items():
-            if user_id != exclude_user_id:
-                await ws.send_json(message)
+    async def broadcast(self, room_id: UUID, message: dict, exclude_session_id: UUID | None = None) -> None:
+        for session_id, info in list(self.connections.get(room_id, {}).items()):
+            if session_id != exclude_session_id:
+                await info['websocket'].send_json(message)
 
-    async def send_to_peer(self, room_id: UUID, sender_id: int, message: dict):
+    async def send_to_peer(self, room_id: UUID, sender_session_id: UUID, message: dict) -> bool:
         room = self.connections.get(room_id, {})
-        for user_id, ws in room.items():
-            if user_id != sender_id:
-                await ws.send_json(message)
+        for session_id, info in room.items():
+            if session_id != sender_session_id:
+                await info['websocket'].send_json(message)
 
                 return True
 
