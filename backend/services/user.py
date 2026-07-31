@@ -1,3 +1,4 @@
+# 'user.py' - сервис пользователя (бизнес).
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.user import User

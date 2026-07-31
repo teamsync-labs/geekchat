@@ -1,3 +1,4 @@
+# 'users.py' - эндпоинты пользователей.
 from fastapi import APIRouter, HTTPException, status, Depends
 from schemas.user import UserCreate, UserResponse
 from api.deps.services import get_user_service

@@ -1,3 +1,4 @@
+# 'room.py' - схемы запросов и ответов, относящиеся к комнате.
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, computed_field
 from uuid import UUID

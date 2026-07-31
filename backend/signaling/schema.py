@@ -1,3 +1,4 @@
+# 'schema.py' - схема сообщения между участниками комнаты.
 from typing import Literal, Any
 from pydantic import BaseModel
 

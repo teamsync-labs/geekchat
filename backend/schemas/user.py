@@ -1,3 +1,4 @@
+# 'user.py' - схемы запросов и ответов, относящиеся к пользователю.
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 
 # Проверить какие будут ошибки при валидации !!!

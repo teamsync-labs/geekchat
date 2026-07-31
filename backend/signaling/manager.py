@@ -1,3 +1,4 @@
+# 'manager.py' - менеджер подключений к комнатам.
 from uuid import UUID
 from fastapi import WebSocket
 import asyncio
@@ -17,12 +18,6 @@ class ConnectionManager:
                        creator_id: int, total_users: int):
 
         async with self.lock:
-            peers = self.connections.get(room_id, {})
-            is_room_empty = len(peers) == ConnectionManager.NONE_PEERS_IN_ROOM
-
-            if is_room_empty and len(self.connections) >= total_users:
-                return False, CODE_7001
-
             if user_id != ConnectionManager.GUEST_ID:
                 if creator_id != user_id:
                     return False, CODE_5002
@@ -30,13 +25,19 @@ class ConnectionManager:
                 if room_id not in self.connections:
                     return False, CODE_7002
 
+            peers = self.connections.get(room_id, {})
+            is_room_empty = len(peers) == ConnectionManager.NONE_PEERS_IN_ROOM
+
+            if is_room_empty and len(self.connections) >= total_users:
+                return False, CODE_7001
+
             is_reconnect = user_id in peers
             if not is_reconnect and len(peers) >= ConnectionManager.MAX_UNITS:
                 return False, CODE_9004
 
             old_websocket = peers.get(user_id)
             if old_websocket is not None and old_websocket is not websocket:
-                await old_websocket.close(code=4009, reason='RECONNECTED')   # state codes ??
+                await old_websocket.close(code=4009, reason='RECONNECTED')   # create class state codes ??
                 print(f'{user_id} reconnected')
 
             self.connections.setdefault(room_id, {})[user_id] = websocket

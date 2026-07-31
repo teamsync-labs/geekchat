@@ -1,3 +1,4 @@
+# 'ws_rooms.py' - эндпоинт вебсокет соединения.
 from uuid import UUID
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status, Depends, HTTPException
 from pydantic import ValidationError

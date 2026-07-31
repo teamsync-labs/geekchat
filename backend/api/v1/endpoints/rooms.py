@@ -1,3 +1,4 @@
+# 'rooms.py' - эндпоинты комнаты.
 from uuid import UUID
 from fastapi import APIRouter, Depends, status, HTTPException
 from api.deps.services import get_room_service

@@ -1,3 +1,4 @@
+# 'room.py' - сервис комнаты (бизнес).
 from datetime import datetime, timezone, timedelta
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
