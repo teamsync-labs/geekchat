@@ -1,3 +1,4 @@
+# 'test_ws_rooms.py' - синхронные тесты для эндпоинта сигналинга.
 import uuid
 import pytest
 from starlette.websockets import WebSocketDisconnect
@@ -19,6 +20,7 @@ def _setup_joinable_room(mock_room_service,
     mock_room_service.get_creator_by_room_id.return_value = CREATOR_ID
     mock_user_service.get_count_users.return_value = total_users
 
+# Тест на несуществующую комнату, до включения в менеджер.
 def test_room_not_found_rejects_before_touching_manager(
         ws_client, mock_room_service, mock_user_service):
 
@@ -36,6 +38,7 @@ def test_room_not_found_rejects_before_touching_manager(
     mock_room_service.check_room_joinable.assert_not_awaited()
     mock_user_service.get_count_users.assert_not_awaited()
 
+# Тест на неактивную комнату до ее включения в менеджер.
 def test_room_not_joinable_rejects_before_touching_manager(
         ws_client, mock_room_service, mock_user_service):
 
@@ -53,6 +56,7 @@ def test_room_not_joinable_rejects_before_touching_manager(
     mock_room_service.check_room_joinable.assert_awaited_once()
     mock_user_service.get_count_users.assert_not_awaited()
 
+# Тест на отклонения подключения третьего гостя.
 def test_owner_and_guest_join_third_guest_gets_room_is_busy(
         ws_client, mock_room_service, mock_user_service):
 
@@ -76,6 +80,7 @@ def test_owner_and_guest_join_third_guest_gets_room_is_busy(
             assert still_alive['type'] == 'offer'
             assert still_alive['from_user_id'] == CREATOR_ID
 
+# Тест на запрет подключения гостя без существования создателя комнаты.
 def test_guest_alone_without_owner_is_rejected(ws_client, mock_room_service, mock_user_service):
     room_id = uuid.uuid4()
     _setup_joinable_room(mock_room_service, mock_user_service, room_id)
@@ -87,6 +92,7 @@ def test_guest_alone_without_owner_is_rejected(ws_client, mock_room_service, moc
     assert exc_info.value.code == 1008
     assert exc_info.value.reason == CODE_7002
 
+# Тест на проверку действительного ID создателя комнаты.
 def test_stranger_user_id_rejected_as_not_owner(ws_client, mock_room_service, mock_user_service):
     room_id = uuid.uuid4()
     _setup_joinable_room(mock_room_service, mock_user_service, room_id)
@@ -99,6 +105,7 @@ def test_stranger_user_id_rejected_as_not_owner(ws_client, mock_room_service, mo
     assert exc_info.value.code == 1008
     assert exc_info.value.reason == CODE_5002
 
+# Тест на запрет создания сессии подключения, когда исчерпан лимит, равный количеству пользователей в системе.
 def test_global_rooms_limit_reached_rejects_new_room(ws_client, mock_room_service, mock_user_service):
     room_id = uuid.uuid4()
     _setup_joinable_room(mock_room_service, mock_user_service, room_id, total_users=0)
@@ -110,6 +117,7 @@ def test_global_rooms_limit_reached_rejects_new_room(ws_client, mock_room_servic
     assert exc_info.value.code == 1008
     assert exc_info.value.reason == CODE_7001
 
+# Тест на удаление старой сессии при переподключении создателя. Только два слота могут быть, для создателя и для гостя.
 def test_owner_reconnect_evicts_old_session_and_frees_slot_for_guest(
         ws_client, mock_room_service, mock_user_service):
 
@@ -132,6 +140,7 @@ def test_owner_reconnect_evicts_old_session_and_frees_slot_for_guest(
                 assert received['type'] == 'offer'
                 assert received['from_user_id'] == CREATOR_ID
 
+# Тест на запрет вечного переподключения гостя.
 def test_guest_does_not_evict_another_guest_with_same_user_id(
         ws_client, mock_room_service, mock_user_service):
 

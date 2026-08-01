@@ -1,3 +1,4 @@
+# 'conftest.py' - конфигурация тестов.
 import os
 os.environ.setdefault('DATABASE_URL', 'postgresql+asyncpg://unit-tests-do-not-connect/placeholder')
 os.environ.setdefault('DEBUG', 'True')

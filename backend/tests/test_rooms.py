@@ -1,3 +1,4 @@
+# 'test_rooms.py' - тесты для эндпоинтов комнаты.
 import uuid
 from datetime import datetime, timezone
 import pytest
@@ -5,6 +6,7 @@ import pytest
 
 ROOMS_URL = '/api/v1/rooms'
 
+# Тест для запроса создания комнаты с возвратом кода 201, ID комнаты и ссылки входа для гостя.
 @pytest.mark.asyncio
 async def test_create_room_returns_201_with_room_id_and_join_url(client, mock_room_service):
     new_room_id = uuid.uuid4()
@@ -24,6 +26,7 @@ async def test_create_room_returns_201_with_room_id_and_join_url(client, mock_ro
 
     mock_room_service.create.assert_awaited_once()
 
+# Тест для запроса получения действительной комнаты с возвратом кода 200 и дополнительной информации.
 @pytest.mark.asyncio
 async def test_get_existing_room_returns_200(client, mock_room_service):
     room_id = uuid.uuid4()
@@ -45,6 +48,7 @@ async def test_get_existing_room_returns_200(client, mock_room_service):
     mock_room_service.get_room_by_id.assert_awaited_once()
     mock_room_service.check_room_joinable.assert_awaited_once()
 
+# Тест возврата кода 404 недействительной комнаты
 @pytest.mark.asyncio
 async def test_get_unknown_room_returns_404(client, mock_room_service):
     unknown_id = uuid.uuid4()

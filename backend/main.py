@@ -1,3 +1,4 @@
+# 'main.py' - инициализация приложения.
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from db.session import init_db, engine
