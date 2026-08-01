@@ -12,7 +12,7 @@ router = APIRouter()
 # current_user: User = Depends(get_current_user)  JWT
 @router.post('/', response_model=RoomJoinLinkResponse, status_code=status.HTTP_201_CREATED)
 async def create_room(data: RoomCreate, service: RoomService = Depends(get_room_service)):
-    return await service.create(data, creator_id=1)
+    return await service.create(data, creator_id=2)
 
 @router.get('/{room_id}', response_model=RoomPreviewResponse, status_code=status.HTTP_200_OK)
 async def check_room_availability(room_id: UUID, service: RoomService = Depends(get_room_service)):

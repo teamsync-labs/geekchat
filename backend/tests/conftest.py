@@ -1,16 +1,23 @@
+import os
+os.environ.setdefault('DATABASE_URL', 'postgresql+asyncpg://geekchat_admin:L4#asH!))@localhost:5432/geekchat')
+os.environ.setdefault('FRONTEND_URL', 'http://localhost:8000')
+os.environ.setdefault('DEBUG', 'True')
 import pytest
 from httpx import AsyncClient, ASGITransport
 from unittest.mock import AsyncMock
 from starlette.testclient import TestClient
 from main import app
-from api.deps.services import get_room_service
+from api.deps.services import get_room_service, get_user_service
 from signaling.manager import manager as ws_manager
 
 
 @pytest.fixture
 def mock_room_service():
-    service = AsyncMock()
-    return service
+    return AsyncMock()
+
+@pytest.fixture
+def mock_user_service():
+    return AsyncMock()
 
 @pytest.fixture
 async def client(mock_room_service):
@@ -23,14 +30,21 @@ async def client(mock_room_service):
     app.dependency_overrides.clear()
 
 @pytest.fixture
-def ws_client():
+def ws_client(mock_room_service, mock_user_service):
+    app.dependency_overrides[get_room_service] = lambda: mock_room_service
+    app.dependency_overrides[get_user_service] = lambda: mock_user_service
+
     with TestClient(app) as test_client:
         yield test_client
+
+    app.dependency_overrides.clear()
 
 @pytest.fixture(autouse=True)
 def reset_ws_manager():
     if hasattr(ws_manager, 'connections'):
         ws_manager.connections.clear()
+
     yield
+
     if hasattr(ws_manager, 'connections'):
         ws_manager.connections.clear()

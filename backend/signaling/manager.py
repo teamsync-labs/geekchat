@@ -44,7 +44,7 @@ class ConnectionManager:
 
             return True, None, session_id
 
-    def remove(self, room_id: UUID, session_id: UUID) -> None:
+    def remove(self, room_id: UUID, session_id: UUID):
         room = self.connections.get(room_id)
 
         if room is None:
@@ -55,12 +55,12 @@ class ConnectionManager:
         if not room:
             del self.connections[room_id]
 
-    async def broadcast(self, room_id: UUID, message: dict, exclude_session_id: UUID | None = None) -> None:
+    async def broadcast(self, room_id: UUID, message: dict, exclude_session_id: UUID | None = None):
         for session_id, info in list(self.connections.get(room_id, {}).items()):
             if session_id != exclude_session_id:
                 await info['websocket'].send_json(message)
 
-    async def send_to_peer(self, room_id: UUID, sender_session_id: UUID, message: dict) -> bool:
+    async def send_to_peer(self, room_id: UUID, sender_session_id: UUID, message: dict):
         room = self.connections.get(room_id, {})
         for session_id, info in room.items():
             if session_id != sender_session_id:

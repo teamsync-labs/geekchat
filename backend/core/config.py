@@ -13,9 +13,9 @@ class Settings(BaseSettings):
     API_TITLE: str = 'GeekChat API'
     API_VERSION: str = '1.0.0'
 
-    FRONTEND_URL = os.getenv('FRONTEND_URL')
+    FRONTEND_URL: str | None = os.getenv('FRONTEND_URL')
 
-    DATABASE_URL = os.getenv('DATABASE_URL')
+    DATABASE_URL: str | None = os.getenv('DATABASE_URL')
 
 
 settings = Settings()
