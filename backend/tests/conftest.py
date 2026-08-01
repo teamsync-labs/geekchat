@@ -1,6 +1,5 @@
 import os
-os.environ.setdefault('DATABASE_URL', 'postgresql+asyncpg://geekchat_admin:L4#asH!))@localhost:5432/geekchat')
-os.environ.setdefault('FRONTEND_URL', 'http://localhost:8000')
+os.environ.setdefault('DATABASE_URL', 'postgresql+asyncpg://unit-tests-do-not-connect/placeholder')
 os.environ.setdefault('DEBUG', 'True')
 import pytest
 from httpx import AsyncClient, ASGITransport
@@ -34,17 +33,13 @@ def ws_client(mock_room_service, mock_user_service):
     app.dependency_overrides[get_room_service] = lambda: mock_room_service
     app.dependency_overrides[get_user_service] = lambda: mock_user_service
 
-    with TestClient(app) as test_client:
-        yield test_client
+    test_client = TestClient(app)
+    yield test_client
 
     app.dependency_overrides.clear()
 
 @pytest.fixture(autouse=True)
 def reset_ws_manager():
-    if hasattr(ws_manager, 'connections'):
-        ws_manager.connections.clear()
-
+    ws_manager.connections.clear()
     yield
-
-    if hasattr(ws_manager, 'connections'):
-        ws_manager.connections.clear()
+    ws_manager.connections.clear()

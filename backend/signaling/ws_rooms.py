@@ -17,18 +17,22 @@ async def ws_room(websocket: WebSocket, room_id: UUID, user_id: int,
                   room_service: RoomService = Depends(get_room_service),
                   user_service: UserService = Depends(get_user_service)):
 
+    await websocket.accept()
+
     room = await room_service.get_room_by_id(room_id)
     if room is None:
-        raise HTTPException(status_code=404, detail=CODE_9001)
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason=CODE_9001)
+
+        return
 
     availability_status = await room_service.check_room_joinable(room)
     if availability_status is not True:
-        raise HTTPException(status_code=410, detail=availability_status)
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason=availability_status)
+
+        return
 
     creator_id = await room_service.get_creator_by_room_id(room_id)
     total_users = await user_service.get_count_users()
-
-    await websocket.accept()
 
     join_status, error_code, session_id = await manager.try_join(room_id, user_id, websocket,
                                                                  creator_id=creator_id, total_users=total_users)
@@ -66,6 +70,6 @@ async def ws_room(websocket: WebSocket, room_id: UUID, user_id: int,
         pass
 
     finally:
-        manager.remove(room_id, session_id)
+        await manager.remove(room_id, session_id)
 
         await manager.broadcast(room_id, {'type': 'peer-left', 'user_id': user_id}, exclude_session_id=session_id)

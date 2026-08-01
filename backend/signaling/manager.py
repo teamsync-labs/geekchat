@@ -9,7 +9,6 @@ from core.error_codes import CODE_7001, CODE_7002, CODE_9004, CODE_5002
 class ConnectionManager:
     MAX_UNITS = 2
     GUEST_ID = 0
-    NONE_PEERS_IN_ROOM = 0
 
     def __init__(self):
         # room_id -> {session_id: {"websocket": WebSocket, "user_id": int}}
@@ -20,6 +19,12 @@ class ConnectionManager:
                        creator_id: int, total_users: int):
 
         async with self.lock:
+            peers = self.connections.get(room_id)
+            is_room_empty = not peers
+
+            if is_room_empty and len(self.connections) >= total_users:
+                return False, CODE_7001, None
+
             if user_id != ConnectionManager.GUEST_ID:
                 if creator_id != user_id:
                     return False, CODE_5002, None
@@ -27,11 +32,18 @@ class ConnectionManager:
                 if room_id not in self.connections:
                     return False, CODE_7002, None
 
-            peers = self.connections.get(room_id, {})
-            is_room_empty = len(peers) == ConnectionManager.NONE_PEERS_IN_ROOM
+            if peers is None:
+                peers = {}
 
-            if is_room_empty and len(self.connections) >= total_users:
-                return False, CODE_7001, None
+            if user_id != ConnectionManager.GUEST_ID:
+                existing_session_id = next(
+                    (sid for sid, info in peers.items() if info['user_id'] == user_id), None)
+
+                if existing_session_id is not None:
+                    old_websocket = peers[existing_session_id]['websocket']
+
+                    await old_websocket.close(code=4009, reason='RECONNECTED')
+                    del peers[existing_session_id]
 
             if len(peers) >= ConnectionManager.MAX_UNITS:
                 return False, CODE_9004, None
@@ -44,7 +56,7 @@ class ConnectionManager:
 
             return True, None, session_id
 
-    def remove(self, room_id: UUID, session_id: UUID):
+    async def remove(self, room_id: UUID, session_id: UUID):
         room = self.connections.get(room_id)
 
         if room is None:
@@ -61,8 +73,7 @@ class ConnectionManager:
                 await info['websocket'].send_json(message)
 
     async def send_to_peer(self, room_id: UUID, sender_session_id: UUID, message: dict):
-        room = self.connections.get(room_id, {})
-        for session_id, info in room.items():
+        for session_id, info in list(self.connections.get(room_id, {}).items()):
             if session_id != sender_session_id:
                 await info['websocket'].send_json(message)
 
