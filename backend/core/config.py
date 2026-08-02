@@ -17,5 +17,10 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str | None = os.getenv('DATABASE_URL')
 
+    SECRET_KEY: str | None = os.getenv('SECRET_KEY')
+    ALGORITHM: str = 'RS256'
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+
 
 settings = Settings()

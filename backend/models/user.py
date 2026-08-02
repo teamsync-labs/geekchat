@@ -2,7 +2,7 @@
 from sqlalchemy import Column, Integer, Text, DateTime, VARCHAR, func
 from db.session import Base
 
-# Добавление полей по мере развития системы (эл. почта, номер тел., и т.п.)
+# Добавление полей по мере развития системы (номер тел., дополнительный емайл и т.п.)
 class User(Base):
     __tablename__ = 'users'
 

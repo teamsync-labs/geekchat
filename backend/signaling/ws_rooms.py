@@ -2,9 +2,9 @@
 from uuid import UUID
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status, Depends, HTTPException
 from pydantic import ValidationError
-from api.deps.services import get_room_service, get_user_service
+from api.deps.services import get_room_service, get_auth_service
 from services.room import RoomService
-from services.user import UserService
+from services.auth import AuthService
 from signaling.manager import manager
 from signaling.schema import SignalMessage
 from core.error_codes import CODE_9001, CODE_7003
@@ -15,7 +15,7 @@ router = APIRouter()
 @router.websocket('/rooms/{room_id}/{user_id}')
 async def ws_room(websocket: WebSocket, room_id: UUID, user_id: int,
                   room_service: RoomService = Depends(get_room_service),
-                  user_service: UserService = Depends(get_user_service)):
+                  user_service: AuthService = Depends(get_auth_service)):
 
     await websocket.accept()
 
