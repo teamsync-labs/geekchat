@@ -1,9 +1,10 @@
 # 'auth.py' - сервис пользователя (бизнес).
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import datetime, timezone
 from models.user import User
 from schemas.auth import UserRegister, UserLogin
-from core.security import UserPassword as hashing
+from core.security import UserPassword, JwtToken
 
 # Logging here !!
 class AuthService:
@@ -17,7 +18,7 @@ class AuthService:
             user = User(
                 user_name=data.username,
                 email=data.email,
-                password_hash=hashing.hash_password(data.password)
+                password_hash=UserPassword.hash_password(data.password)
             )
 
             self.db.add(user)
@@ -34,71 +35,64 @@ class AuthService:
 
         return result.scalar_one()
 
-    async def _get_by_email(self, email: str):
+    async def _get_by_email(self, email):
         stmt = select(User).where(User.email == email)
         result = await self.db.execute(stmt)
 
         return result.scalars().first()
 
-    async def login_user(self, data: UserLogin) -> tuple[User, str, str]:
+    async def login_user(self, data: UserLogin):
         stmt = select(User).where(User.user_name == data.username)
         result = await self.db.execute(stmt)
         user = result.scalars().first()
 
-        if not user:
-            print(f'Login attempt by a non-existent user: {data.username}')
+        if user is None:
+            print(f'Login attempt by a non-existent user: {data.username}')   # error logging !!
+
+            raise ValueError('False login or password')  # error codes ??
+
+        if not user.is_active:
+            print(f'Login attempt by a deactivated user: {user.user_name}')
+
+            raise ValueError('Account deactivated')
+
+        if not UserPassword.verify_password(data.password, user.password_hash):
+            print(f'Invalid password for: {user.user_name}')
 
             raise ValueError('False login or password')
 
-        if not user.is_active:
-            logger.warning(f"Попытка входа деактивированного пользователя: {user.username}")
-            raise ValueError("Аккаунт деактивирован")
+        user.last_login = datetime.now(timezone.utc)
+        await self.db.commit()
 
-        # 3. Проверяем пароль
-        if not verify_password(data.password, user.password_hash):
-            logger.warning(f"Неправильный пароль для: {user.username}")
-            raise ValueError("Неверное имя пользователя или пароль")
+        access_token = JwtToken.create_access_token(user.id)
+        # refresh token create
 
-        # 4. Обновляем время последнего входа
-        from datetime import datetime
-        user.last_login = datetime.utcnow()
-        await db.commit()
+        print(f'User login: {user.user_name}')
 
-        # 5. Создаём токены
-        access_token = create_access_token(user.id)
-        refresh_token = create_refresh_token(user.id)
+        return user, access_token     # > refresh_token
 
-        logger.info(f"✅ Пользователь вошёл: {user.username}")
-
-        return user, access_token, refresh_token
-
-    @staticmethod
-    async def get_current_user(db: AsyncSession, token: str) -> User:
-        """
-        Получить текущего пользователя по токену
-        ✅ Используется в dependencies
-        """
-
-        # 1. Проверяем токен
+    async def get_current_user(self, token):
         try:
-            payload = verify_token(token, token_type="access")
+            payload = JwtToken.verify_token(token, token_type='access')
         except ValueError as e:
-            logger.warning(f"Ошибка при проверке токена: {e}")
+            print(f'Check token error: {e}')
+
             raise ValueError(str(e))
 
-        user_id = payload.get("user_id")
+        user_id = payload.get('user_id')
 
-        # 2. Получаем пользователя
         stmt = select(User).where(User.id == user_id)
-        result = await db.execute(stmt)
+        result = await self.db.execute(stmt)
         user = result.scalars().first()
 
         if not user:
-            logger.warning(f"Пользователь не найден: {user_id}")
-            raise ValueError("Пользователь не найден")
+            print(f'User not found: {user_id}')
+
+            raise ValueError('User not found')
 
         if not user.is_active:
-            logger.warning(f"Аккаунт деактивирован: {user.username}")
-            raise ValueError("Аккаунт деактивирован")
+            print(f'Account deactivated: {user.user_name}')
+
+            raise ValueError('Account deactivated')
 
         return user

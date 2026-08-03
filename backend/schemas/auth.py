@@ -26,8 +26,9 @@ class UserWithToken(BaseModel):
     access_token: str
     token_type: str = 'bearer'
 
-
+'''
 class Token(BaseModel):
     access_token: str
     token_type: str = 'bearer'
     expires_in: int
+'''

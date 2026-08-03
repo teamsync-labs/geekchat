@@ -7,7 +7,7 @@ from services.room import RoomService
 from services.auth import AuthService
 from signaling.manager import manager
 from signaling.schema import SignalMessage
-from core.error_codes import CODE_9001, CODE_7003
+from core.program_codes import RoomState as rs, WebsocketState as ws
 
 
 router = APIRouter()
@@ -21,7 +21,7 @@ async def ws_room(websocket: WebSocket, room_id: UUID, user_id: int,
 
     room = await room_service.get_room_by_id(room_id)
     if room is None:
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason=CODE_9001)
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason=rs.CODE_9001)
 
         return
 
@@ -64,7 +64,7 @@ async def ws_room(websocket: WebSocket, room_id: UUID, user_id: int,
                 },
             )
             if not delivered:
-                await websocket.send_json({'type': 'error', 'detail': CODE_7003})
+                await websocket.send_json({'type': 'error', 'detail': ws.CODE_7003})
 
     except WebSocketDisconnect:
         pass

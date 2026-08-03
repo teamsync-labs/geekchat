@@ -18,52 +18,56 @@ class UserPassword:
     def verify_password(plain_password, hashed_password):
         return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
-# -------------------------------------------------------------------
+
+class JwtToken:
 # Где функция print, там будет логирование.
-def create_access_token(user_id, expires_delta: Optional[timedelta] = None):
-    if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
-    else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=s.ACCESS_TOKEN_EXPIRE_MINUTES)
+    @staticmethod
+    def create_access_token(user_id, expires_delta: Optional[timedelta] = None):
+        if expires_delta:
+            expire = datetime.now(timezone.utc) + expires_delta
+        else:
+            expire = datetime.now(timezone.utc) + timedelta(minutes=s.ACCESS_TOKEN_EXPIRE_MINUTES)
 
-    token = jwt.encode({ 'user_id': user_id, 'expire': expire, 'type': 'access' },
-                       s.SECRET_KEY, algorithm=s.ALGORITHM)
+        token = jwt.encode({ 'user_id': user_id, 'expire': expire, 'type': 'access' },
+                           s.JWT_SECRET, algorithm=s.JWT_ALGORITHM)
 
-    print(f'Access Token is created for {user_id}')
+        print(f'Access Token is created for {user_id}')
 
-    return token
+        return token
 
-def verify_token(token, token_type = 'access'):
-    try:
-        payload = jwt.decode(token, s.SECRET_KEY, algorithms=[s.ALGORITHM])
+    @staticmethod
+    def verify_token(token, token_type = 'access'):
+        try:
+            payload = jwt.decode(token, s.JWT_SECRET, algorithms=[s.JWT_ALGORITHM])
 
-        if payload.get('type') != token_type:
-            print(f'Invalid token type: reference {token_type}, current {payload.get('type')}')
+            if payload.get('type') != token_type:
+                print(f'Invalid token type: reference {token_type}, current {payload.get('type')}')
 
-            raise ValueError('Invalid token type')  # error codes ???
+                raise ValueError('Invalid token type')  # error codes ???
 
-        user_id = payload.get('user_id')
+            user_id = payload.get('user_id')
 
-        if not user_id:
-            raise ValueError('Token is not contains user_id')
+            if not user_id:
+                raise ValueError('Token is not contains user_id')
 
-        return { 'user_id': user_id }
+            return { 'user_id': user_id }
 
-    except jwt.ExpiredSignatureError:
-        print('Token has expired')
+        except jwt.ExpiredSignatureError:
+            print('Token has expired')
 
-        raise ValueError('Token has expired')
+            raise ValueError('Token has expired')
 
-    except jwt.InvalidTokenError as e:
-        print(f'False token: {e}')
+        except jwt.InvalidTokenError as e:
+            print(f'False token: {e}')
 
-        raise ValueError('False token')
+            raise ValueError('False token')
 
-def decode_token(token):
-    try:
-        payload = jwt.decode(token, s.SECRET_KEY, algorithms=[s.ALGORITHM])
+    @staticmethod
+    def decode_token(token):
+        try:
+            payload = jwt.decode(token, s.JWT_SECRET, algorithms=[s.JWT_ALGORITHM])
 
-        return payload
+            return payload
 
-    except jwt.DecodeError:
-        raise ValueError('Token decoding error')
+        except jwt.DecodeError:
+            raise ValueError('Token decoding error')
