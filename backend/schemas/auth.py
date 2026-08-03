@@ -1,5 +1,8 @@
 # 'auth.py' - схемы запросов и ответов, относящиеся к пользователю.
+from datetime import datetime
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
+from typing import Optional
+
 
 # Проверить какие будут ошибки при валидации !!!
 class UserRegister(BaseModel):
@@ -19,16 +22,13 @@ class UserResponse(BaseModel):
     user_id: int
     user_name: str
     email: str
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+    last_login: Optional[datetime] = None
 
 
 class UserWithToken(BaseModel):
     user: UserResponse
     access_token: str
     token_type: str = 'bearer'
-
-'''
-class Token(BaseModel):
-    access_token: str
-    token_type: str = 'bearer'
-    expires_in: int
-'''

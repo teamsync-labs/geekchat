@@ -1,6 +1,6 @@
 # 'security.py' - сущности безопасности.
 import bcrypt
-import jwt
+from jwt import encode, decode, DecodeError, ExpiredSignatureError, InvalidTokenError
 from datetime import datetime, timedelta, timezone
 from core.config import settings as s
 from typing import Optional
@@ -28,7 +28,7 @@ class JwtToken:
         else:
             expire = datetime.now(timezone.utc) + timedelta(minutes=s.ACCESS_TOKEN_EXPIRE_MINUTES)
 
-        token = jwt.encode({ 'user_id': user_id, 'expire': expire, 'type': 'access' },
+        token = encode({ 'user_id': user_id, 'expire': expire, 'type': 'access' },
                            s.JWT_SECRET, algorithm=s.JWT_ALGORITHM)
 
         print(f'Access Token is created for {user_id}')
@@ -38,7 +38,7 @@ class JwtToken:
     @staticmethod
     def verify_token(token, token_type = 'access'):
         try:
-            payload = jwt.decode(token, s.JWT_SECRET, algorithms=[s.JWT_ALGORITHM])
+            payload = decode(token, s.JWT_SECRET, algorithms=[s.JWT_ALGORITHM])
 
             if payload.get('type') != token_type:
                 print(f'Invalid token type: reference {token_type}, current {payload.get('type')}')
@@ -52,12 +52,12 @@ class JwtToken:
 
             return { 'user_id': user_id }
 
-        except jwt.ExpiredSignatureError:
+        except ExpiredSignatureError:
             print('Token has expired')
 
             raise ValueError('Token has expired')
 
-        except jwt.InvalidTokenError as e:
+        except InvalidTokenError as e:
             print(f'False token: {e}')
 
             raise ValueError('False token')
@@ -65,9 +65,9 @@ class JwtToken:
     @staticmethod
     def decode_token(token):
         try:
-            payload = jwt.decode(token, s.JWT_SECRET, algorithms=[s.JWT_ALGORITHM])
+            payload = decode(token, s.JWT_SECRET, algorithms=[s.JWT_ALGORITHM])
 
             return payload
 
-        except jwt.DecodeError:
+        except DecodeError:
             raise ValueError('Token decoding error')
