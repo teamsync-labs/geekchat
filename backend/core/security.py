@@ -30,13 +30,11 @@ class JwtToken:
 
         print('Creating access token !!!')
 
-        payload = {
-            'user_id': user_id,
-            'exp': expire,
-            'type': 'access'
-        }
-
-        token = encode(payload, s.JWT_SECRET, algorithm=s.JWT_ALGORITHM)
+        token = encode(
+            payload={'user_id': user_id, 'exp': expire, 'type': 'access'},
+            key=s.JWT_SECRET,
+            algorithm=s.JWT_ALGORITHM
+        )
 
         print(f'Access Token is created for {user_id}')
 

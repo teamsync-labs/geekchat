@@ -12,8 +12,8 @@ class UserRegister(BaseModel):
 
 
 class UserLogin(BaseModel):
-    username: str
-    password: str
+    email: EmailStr
+    password: str = Field(..., min_length=8, max_length=50)
 
 
 class UserResponse(BaseModel):
@@ -33,3 +33,7 @@ class UserWithToken(BaseModel):
     user: UserResponse
     access_token: str
     token_type: str = 'bearer'
+
+
+class TokenResponse(BaseModel):
+    access_token: str

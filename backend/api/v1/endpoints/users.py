@@ -1,11 +1,12 @@
 # 'users.py' - эндпоинты пользователей.
 from fastapi import APIRouter, HTTPException, status, Depends
 from api.deps.auth import get_current_user
-from schemas.auth import UserRegister, UserWithToken, UserLogin, UserResponse
+from schemas.auth import UserRegister, UserWithToken, UserLogin, UserResponse, TokenResponse
 from api.deps.services import get_auth_service
 from services.auth import AuthService
 from core.security import JwtToken
 from core.program_codes import UserState as us
+from models.user import User
 
 
 router = APIRouter()
@@ -33,21 +34,19 @@ async def register(data: UserRegister, service: AuthService = Depends(get_auth_s
 
             raise HTTPException(status_code=400, detail=us.CODE_5001)
 
-    except Exception as e:   # what is Exception ???
+    except Exception as e:
         print(f'Create user critical error: {e}')
 
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Create user error')
 
-@router.post('/login', response_model=UserWithToken)
+@router.post('/login', response_model=TokenResponse)
 async def login(data: UserLogin, service: AuthService = Depends(get_auth_service)):
     try:
-        user, access_token = await service.login_user(data)
+        access_token = await service.login_user(data)
 
         return {
-            'user': user,
             'access_token': access_token,
             #"refresh_token": refresh_token,
-            'token_type': 'bearer'
         }
 
     except ValueError as e:
@@ -61,5 +60,5 @@ async def login(data: UserLogin, service: AuthService = Depends(get_auth_service
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Entering error')
 
 @router.get('/me', response_model=UserResponse)
-async def get_me(current_user = Depends(get_current_user)):
+async def get_me(current_user: User = Depends(get_current_user)):
     return current_user

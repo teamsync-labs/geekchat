@@ -42,14 +42,14 @@ class AuthService:
         return result.scalars().first()
 
     async def login_user(self, data: UserLogin):
-        stmt = select(User).where(User.user_name == data.username)
+        stmt = select(User).where(User.email == data.email)
         result = await self.db.execute(stmt)
         user = result.scalars().first()
 
         if user is None:
-            print(f'Login attempt by a non-existent user: {data.username}')   # error logging !!
+            print(f'Login attempt by a non-existent email: {data.email}')   # error logging !!
 
-            raise ValueError('False login or password')  # error codes ??
+            raise ValueError('False email or password')  # error codes ??
 
         if not user.is_active:
             print(f'Login attempt by a deactivated user: {user.user_name}')
@@ -59,7 +59,7 @@ class AuthService:
         if not UserPassword.verify_password(data.password, user.password_hash):
             print(f'Invalid password for: {user.user_name}')
 
-            raise ValueError('False login or password')
+            raise ValueError('False email or password')
 
         user.last_login = datetime.now(timezone.utc)
         await self.db.commit()
@@ -69,7 +69,7 @@ class AuthService:
 
         print(f'User login: {user.user_name}')
 
-        return user, access_token     # > refresh_token
+        return access_token     # > refresh_token
 
     async def get_current_user(self, token):
         try:

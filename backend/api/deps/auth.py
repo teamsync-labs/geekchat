@@ -15,6 +15,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
     try:
         payload = JwtToken.verify_token(token, token_type='access')
+
         user_id = payload.get('user_id')
     except ValueError as e:
         print(f'Check token error: {e}')
