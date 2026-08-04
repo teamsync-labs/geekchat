@@ -26,10 +26,17 @@ class JwtToken:
         if expires_delta:
             expire = datetime.now(timezone.utc) + expires_delta
         else:
-            expire = datetime.now(timezone.utc) + timedelta(minutes=s.ACCESS_TOKEN_EXPIRE_MINUTES)
+            expire = datetime.now(timezone.utc) + timedelta(minutes=int(s.ACCESS_TOKEN_EXPIRE_MINUTES))
 
-        token = encode({ 'user_id': user_id, 'expire': expire, 'type': 'access' },
-                           s.JWT_SECRET, algorithm=s.JWT_ALGORITHM)
+        print('Creating access token !!!')
+
+        payload = {
+            'user_id': user_id,
+            'exp': expire,
+            'type': 'access'
+        }
+
+        token = encode(payload, s.JWT_SECRET, algorithm=s.JWT_ALGORITHM)
 
         print(f'Access Token is created for {user_id}')
 
@@ -61,13 +68,3 @@ class JwtToken:
             print(f'False token: {e}')
 
             raise ValueError('False token')
-
-    @staticmethod
-    def decode_token(token):
-        try:
-            payload = decode(token, s.JWT_SECRET, algorithms=[s.JWT_ALGORITHM])
-
-            return payload
-
-        except DecodeError:
-            raise ValueError('Token decoding error')

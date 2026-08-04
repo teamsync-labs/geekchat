@@ -23,6 +23,7 @@ class UserResponse(BaseModel):
     user_name: str
     email: str
     is_active: bool
+    is_verified: bool
     created_at: datetime
     updated_at: datetime
     last_login: Optional[datetime] = None

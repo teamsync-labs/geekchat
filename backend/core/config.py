@@ -17,9 +17,7 @@ class Settings(BaseSettings):
 
     JWT_SECRET: str | None = os.getenv('JWT_SECRET')
     JWT_ALGORITHM: str | None = os.getenv('JWT_ALGORITHM')
-
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    ACCESS_TOKEN_EXPIRE_MINUTES: str | None = os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES')
 
 
 settings = Settings()

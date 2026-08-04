@@ -64,7 +64,7 @@ class AuthService:
         user.last_login = datetime.now(timezone.utc)
         await self.db.commit()
 
-        access_token = JwtToken.create_access_token(user.id)
+        access_token = JwtToken.create_access_token(user.user_id)
         # refresh token create
 
         print(f'User login: {user.user_name}')
@@ -81,7 +81,7 @@ class AuthService:
 
         user_id = payload.get('user_id')
 
-        stmt = select(User).where(User.id == user_id)
+        stmt = select(User).where(User.user_id == user_id)
         result = await self.db.execute(stmt)
         user = result.scalars().first()
 
