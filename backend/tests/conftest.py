@@ -1,6 +1,9 @@
 # 'conftest.py' - конфигурация тестов.
 import os
 os.environ.setdefault('DATABASE_URL', 'postgresql+asyncpg://unit-tests-do-not-connect/placeholder')
+os.environ.setdefault('JWT_SECRET', 'test-secret-key-not-for-production')
+os.environ.setdefault('JWT_ALGORITHM', 'HS256')
+os.environ.setdefault('ACCESS_TOKEN_EXPIRE_MINUTES', '30')
 os.environ.setdefault('DEBUG', 'True')
 import pytest
 from httpx import AsyncClient, ASGITransport
