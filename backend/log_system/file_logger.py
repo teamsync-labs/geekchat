@@ -2,12 +2,13 @@ import logging
 from pathlib import Path
 from typing import Optional
 from log_system.base_logging import BaseLoggingEntity
+from backend.core.program_codes import UserState, RoomState, WebsocketState
 
 
 class FileLogger(BaseLoggingEntity):
 
 
-    def __init__(self):
+    def __init__(self) -> None:
         log_dir = Path('logs')
         log_file_path = log_dir / 'program_log.log'
         log_dir.mkdir(parents=True, exist_ok=True)
@@ -28,16 +29,23 @@ class FileLogger(BaseLoggingEntity):
             web_code: Optional[str] = 'not required'
     ) -> None:
 
-        message = (f'Код: {internal_error_code},'
-                   f'Коммент: {comment},'
-                   f'Веб-Код: {web_code}')
+        description = 'UNKNOWN ERROR'
 
-        level = level.upper()
-        match level:
+        if hasattr(UserState, internal_error_code):
+            description = getattr(UserState, internal_error_code)
+        elif hasattr(RoomState, internal_error_code):
+            description = getattr(RoomState, internal_error_code)
+        elif hasattr(WebsocketState, internal_error_code):
+            description = getattr(WebsocketState, internal_error_code)
+
+        message = (f'{internal_error_code} -'
+                   f' {description} -'
+                   f' {comment} -'
+                   f' {web_code}')
+
+        match level.upper():
             case 'DEBUG':
                 logging.debug(message)
-            case 'INFO':
-                logging.info(message)
             case 'WARNING':
                 logging.warning(message)
             case 'ERROR':
