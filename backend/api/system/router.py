@@ -1,3 +1,4 @@
+# 'router.py' - системные эндпоинты.
 from fastapi import APIRouter
 from core.config import settings as s
 

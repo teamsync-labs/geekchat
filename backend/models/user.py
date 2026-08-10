@@ -1,3 +1,4 @@
+# 'user.py' - модель сущности "пользователь" базы данных.
 from sqlalchemy import Column, Integer, Text, DateTime, VARCHAR, func
 from db.session import Base
 
@@ -5,9 +6,9 @@ from db.session import Base
 class User(Base):
     __tablename__ = 'users'
 
-    user_id = Column(Integer, primary_key=True, autoincrement=True)    # default index
+    user_id = Column(Integer, primary_key=True, autoincrement=True)
     user_name = Column(Text, nullable=False, index=True)
-    email = Column(VARCHAR(255), nullable=False, unique=True)   # default index
+    email = Column(VARCHAR(255), nullable=False, unique=True)
     password_hash = Column(Text, nullable=False)    # no index !
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 

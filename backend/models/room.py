@@ -1,3 +1,4 @@
+# 'room.py' - модель сущности "комната" базы данных.
 from sqlalchemy import Column, Integer, DateTime, ForeignKey, text, UUID, func, Enum as SQLEnum
 from db.session import Base
 from db.room_status import RoomStatus
@@ -11,6 +12,7 @@ class Room(Base):
     status = Column(SQLEnum(RoomStatus, native_enum=True, name='room_status_enum',
                             values_callable=lambda obj: [e.value for e in obj]),
                             default=RoomStatus.ACTIVE, nullable=False, server_default=RoomStatus.ACTIVE.value)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     expires_at = Column(DateTime(timezone=True), nullable=False)
 

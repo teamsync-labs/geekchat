@@ -1,3 +1,4 @@
+# 'room_status.py' - статусы комнаты.
 from enum import Enum
 
 

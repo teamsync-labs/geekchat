@@ -1,3 +1,4 @@
+# 'router.py' - маршрутизаторы API v1.
 from fastapi import APIRouter
 from api.v1.endpoints import users, rooms
 
