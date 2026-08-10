@@ -34,10 +34,34 @@ infra/             деплой и окружения
 
 ## Локальный запуск
 
+### Требования
+- Docker (>= 20.10)
+- Docker Compose (>= 2.0)
+
+### Запуск
 ```bash
-docker compose up
+cp .env.example .env
+# frontend: нужен dist/ перед docker build
+(cd frontend && npm ci && npm run build)
+docker compose up --build
 ```
-## Запуск из виртуального окружения
+
+В `.env` задано `COMPOSE_FILE=…:docker-compose.dev.yml` — снаружи один порт `NGINX_PORT` (по умолчанию `8089`).
+
+Проверка:
+- сайт: http://localhost:8089/
+- health: http://localhost:8089/health → `{"status":"OK"}`
+- docs: http://localhost:8089/docs
+- API: `/api/v1/...`
+
+### Остановка
+```bash
+docker compose down
+```
+
+CI/CD: [`docs/cicd.md`](docs/cicd.md).
+
+## Запуск backend из виртуального окружения
 
 1. В Windows запустите командную оболочку cmd.exe или PowerShell, в Linux запустите терминал.
 <br><br>
