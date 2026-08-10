@@ -21,10 +21,12 @@
 |------|----------|
 | `SSH_PRIVATE_KEY` | deploy-ключ пользователя `geekchat-prod` (private) |
 | `POSTGRES_PASSWORD` | сырой пароль БД |
+| `JWT_SECRET` | секрет подписи access JWT (длинная случайная строка) |
 
 `DATABASE_URL` **не** нужен — собирается в `scripts/vps-write-deploy-env.sh` (`postgresql+asyncpg://…@db:5432/…`, URL-encode пароля, `$` → `$$` для Compose).  
-`BASE_URL` тоже пишется из `APP_PUBLIC_URL` (публичный URL для join-ссылок).
-
+`BASE_URL` тоже пишется из `APP_PUBLIC_URL` (публичный URL для join-ссылок).  
+`JWT_SECRET` пишется в `.env` и прокидывается в `backend` через compose.  
+`JWT_ALGORITHM` / `ACCESS_TOKEN_EXPIRE_MINUTES` — **не** в GitHub: дефолты в `backend/core/config.py` (`HS256`, `30`).
 ### Variables
 
 | Name | Смысл / пример |
