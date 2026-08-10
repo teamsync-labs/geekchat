@@ -8,7 +8,9 @@ class Room(Base):
     __tablename__ = 'rooms'
 
     room_id = Column(UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()'))
-    creator_id = Column(Integer, ForeignKey('users.user_id'), nullable=True)    # null if not auth !!
+
+    creator_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
+
     status = Column(SQLEnum(RoomStatus, native_enum=True, name='room_status_enum',
                             values_callable=lambda obj: [e.value for e in obj]),
                             default=RoomStatus.ACTIVE, nullable=False, server_default=RoomStatus.ACTIVE.value)

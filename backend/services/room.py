@@ -5,14 +5,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from models.room import Room
 from schemas.room import RoomCreate
 from db.room_status import RoomStatus
-from core.error_codes import CODE_9002, CODE_9003
+from core.program_codes import RoomState as rs
 
 
 class RoomService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create(self, data: RoomCreate, creator_id: int):
+    async def create(self, data: RoomCreate, creator_id):
         room = Room(
             creator_id=creator_id,
             expires_at=datetime.now(timezone.utc) + timedelta(minutes=data.ttl)
@@ -33,9 +33,9 @@ class RoomService:
     @staticmethod
     async def check_room_joinable(room: Room):
         if room.status == RoomStatus.ENDED:
-            return CODE_9002
+            return rs.CODE_9002
         elif datetime.now(timezone.utc) > room.expires_at:
-            return CODE_9003
+            return rs.CODE_9003
         else:
             return True
 

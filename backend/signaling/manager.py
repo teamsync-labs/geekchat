@@ -3,7 +3,7 @@ import uuid
 from uuid import UUID
 from fastapi import WebSocket
 import asyncio
-from core.error_codes import CODE_7001, CODE_7002, CODE_9004, CODE_5002
+from core.program_codes import UserState as us, RoomState as rs, WebsocketState as ws
 
 
 class ConnectionManager:
@@ -23,14 +23,14 @@ class ConnectionManager:
             is_room_empty = not peers
 
             if is_room_empty and len(self.connections) >= total_users:
-                return False, CODE_7001, None
+                return False, ws.CODE_7001, None
 
             if user_id != ConnectionManager.GUEST_ID:
                 if creator_id != user_id:
-                    return False, CODE_5002, None
+                    return False, us.CODE_5002, None
             else:
                 if room_id not in self.connections:
-                    return False, CODE_7002, None
+                    return False, ws.CODE_7002, None
 
             if peers is None:
                 peers = {}
@@ -46,7 +46,7 @@ class ConnectionManager:
                     del peers[existing_session_id]
 
             if len(peers) >= ConnectionManager.MAX_UNITS:
-                return False, CODE_9004, None
+                return False, rs.CODE_9004, None
 
             session_id = uuid.uuid4()
             self.connections.setdefault(room_id, {})[session_id] = {
