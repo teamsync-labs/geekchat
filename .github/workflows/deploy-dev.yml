@@ -111,6 +111,7 @@ jobs:
           APP_PUBLIC_URL: ${{ steps.meta.outputs.app_public_url }}
           HEALTHCHECK_URL: ${{ steps.meta.outputs.healthcheck_url }}
           DATA_PATH: ${{ vars.DATA_PATH }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
           : "${POSTGRES_USER:=geekchat}"
           : "${POSTGRES_DB:=geekchat}"

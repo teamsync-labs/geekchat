@@ -11,4 +11,3 @@ tests
 *.md
 .gitignore
 .DS_Store
-signaling

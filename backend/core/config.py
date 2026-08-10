@@ -17,9 +17,11 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str = os.getenv('DATABASE_URL')
 
+    # JWT_SECRET — обязательно в prod (GitHub Secret → compose .env).
+    # Algorithm и TTL без GitHub vars: дефолты здесь, env только для локального override.
     JWT_SECRET: str | None = os.getenv('JWT_SECRET')
-    JWT_ALGORITHM: str | None = os.getenv('JWT_ALGORITHM')
-    ACCESS_TOKEN_EXPIRE_MINUTES: str | None = os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES')
+    JWT_ALGORITHM: str = os.getenv('JWT_ALGORITHM') or 'HS256'
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES') or '30')
 
 
 settings = Settings()

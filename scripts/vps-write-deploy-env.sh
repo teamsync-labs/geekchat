@@ -30,6 +30,7 @@ write_kv_compose() {
 : "${APP_PUBLIC_URL:?}"
 : "${HEALTHCHECK_URL:?}"
 : "${DATA_PATH:?}"
+: "${JWT_SECRET:?}"
 
 pass_enc="$(
   POSTGRES_PASSWORD="$POSTGRES_PASSWORD" python3 -c \
@@ -50,6 +51,9 @@ write_kv_compose DATABASE_URL "$DATABASE_URL"
 # join_url и публичные ссылки backend
 write_kv_compose BASE_URL "$APP_PUBLIC_URL"
 write_kv_compose APP_PUBLIC_URL "$APP_PUBLIC_URL"
+
+# auth (algorithm/TTL — дефолты в backend/core/config.py)
+write_kv_compose JWT_SECRET "$JWT_SECRET"
 
 write_kv_compose NGINX_PORT "$NGINX_PORT"
 write_kv_compose NGINX_BIND "$NGINX_BIND"
