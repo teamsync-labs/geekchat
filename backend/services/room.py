@@ -24,6 +24,12 @@ class RoomService:
 
         return room
 
+    async def get_creator_by_room_id(self, room_id):
+        stmt = select(Room.creator_id).where(Room.room_id == room_id)
+        result = await self.db.execute(stmt)
+
+        return result.scalar_one()
+
     async def get_room_by_id(self, room_id):
         stmt = select(Room).where(Room.room_id == room_id)
         result = await self.db.execute(stmt)
@@ -38,9 +44,3 @@ class RoomService:
             return rs.CODE_9003
         else:
             return True
-
-    async def get_creator_by_room_id(self, room_id):
-        stmt = select(Room.creator_id).where(Room.room_id == room_id)
-        result = await self.db.execute(stmt)
-
-        return result.scalar_one()

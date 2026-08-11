@@ -15,6 +15,31 @@ class ConnectionManager:
         self.connections: dict[UUID, dict[UUID, dict]] = {}
         self.lock = asyncio.Lock()
 
+    async def broadcast(self, room_id: UUID, message: dict, exclude_session_id: UUID | None = None):
+        for session_id, info in list(self.connections.get(room_id, {}).items()):
+            if session_id != exclude_session_id:
+                await info['websocket'].send_json(message)
+
+    async def remove(self, room_id: UUID, session_id: UUID):
+        room = self.connections.get(room_id)
+
+        if room is None:
+            return
+
+        room.pop(session_id, None)
+
+        if not room:
+            del self.connections[room_id]
+
+    async def send_to_peer(self, room_id: UUID, sender_session_id: UUID, message: dict):
+        for session_id, info in list(self.connections.get(room_id, {}).items()):
+            if session_id != sender_session_id:
+                await info['websocket'].send_json(message)
+
+                return True
+
+        return False
+
     async def try_join(self, room_id: UUID, user_id: int, websocket: WebSocket,
                        creator_id: int, total_users: int):
 
@@ -55,31 +80,6 @@ class ConnectionManager:
             }
 
             return True, None, session_id
-
-    async def remove(self, room_id: UUID, session_id: UUID):
-        room = self.connections.get(room_id)
-
-        if room is None:
-            return
-
-        room.pop(session_id, None)
-
-        if not room:
-            del self.connections[room_id]
-
-    async def broadcast(self, room_id: UUID, message: dict, exclude_session_id: UUID | None = None):
-        for session_id, info in list(self.connections.get(room_id, {}).items()):
-            if session_id != exclude_session_id:
-                await info['websocket'].send_json(message)
-
-    async def send_to_peer(self, room_id: UUID, sender_session_id: UUID, message: dict):
-        for session_id, info in list(self.connections.get(room_id, {}).items()):
-            if session_id != sender_session_id:
-                await info['websocket'].send_json(message)
-
-                return True
-
-        return False
 
 
 manager = ConnectionManager()
