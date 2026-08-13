@@ -23,3 +23,10 @@ class LogLevel:
     WARNING = 'WARNING'
     ERROR = 'ERROR'
     CRITICAL = 'CRITICAL'
+
+
+class SystemState:
+    CODE_1001 = 'APP_START'
+    CODE_1002 = 'APP_SHUTDOWN'
+    CODE_1003 = 'DB_INIT'
+    CODE_1004 = 'DB_CLOSED'
