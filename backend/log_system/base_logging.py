@@ -1,8 +1,9 @@
+# 'base_logging.py' - базовый класс для логгеров по бизнес-объектам.
 from typing import Optional
 import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
-from backend.core.program_codes import LogLevel as l
+from core.program_codes import LogLevel as l
 
 
 class BaseLoggingEntity(ABC):
@@ -25,13 +26,13 @@ class BaseLoggingEntity(ABC):
 
     @staticmethod
     async def create_log_line(
-        internal_error_code,
+        internal_code,
         log_level: str,
         description: Optional[str] = 'None',
         web_code: Optional[str] = 'not required'
     ):
 
-        message = f'{internal_error_code} - {description} - {description} - web_code: {web_code}'
+        message = f'{internal_code} - {description} - web_code: {web_code}'
 
         match log_level.upper():
             case l.INFO:
