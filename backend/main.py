@@ -6,11 +6,16 @@ from core.config import settings as s
 from api.v1.router import api_router
 from api.system.router import system_router
 from signaling.ws_rooms import router as ws_router
+from log_system.system_logging_entity import SystemLoggingEntity
+from core.program_codes import LogLevel as l
 
+
+logger = SystemLoggingEntity()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print('App starting ...')
+    await logger.create_log_line('CODE_XXX', log_level=l.INFO, description='App Start')
     await init_db()
     print('Database initialized')
 
