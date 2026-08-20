@@ -20,7 +20,7 @@ class RoomJoinLinkResponse(BaseRoomResponse):
     @computed_field(return_type=str)
     @property
     def join_url(self):
-        return f'{s.FRONTEND_URL}/call/{self.room_id}'
+        return f'{s.BASE_URL}/call/{self.room_id}'
 
 
 class RoomPreviewResponse(BaseRoomResponse):

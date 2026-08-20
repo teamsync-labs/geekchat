@@ -1,13 +1,199 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>geekchat</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeekChat</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-bg">
+    <div class="stars"></div>
+    <div class="orbit orbit-one"></div>
+    <div class="orbit orbit-two"></div>
+    <div class="orbit orbit-three"></div>
+
+    <header class="header">
+      <button class="logo" type="button" data-screen="home">
+        <span class="logo-icon">G</span>
+        <span>GeekChat</span>
+      </button>
+
+      <div class="header-actions" id="headerActions">
+        <button class="btn btn-ghost" type="button" data-screen="login">Вход</button>
+        <button class="btn btn-primary" type="button" data-screen="register">Регистрация</button>
+      </div>
+    </header>
+
+    <main class="main">
+
+      <section class="screen active" id="screen-home">
+        <div class="hero">
+          <div class="badge">Видеовстречи нового поколения</div>
+          <h1>Общайтесь по видео <span>быстро и удобно</span></h1>
+          <p>Создавайте приватные видеовстречи, приглашайте участников и подключайтесь к разговору за несколько секунд.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary btn-large" type="button" id="createRoomBtn">Создать встречу</button>
+            <button class="btn btn-secondary btn-large" type="button" data-screen="join">Присоединиться</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-login">
+        <div class="card auth-card">
+          <h2>Вход</h2>
+          <p>Введите данные, чтобы продолжить.</p>
+          <form id="loginForm" class="form">
+            <label>Email <input type="email" placeholder="you@example.com" required /></label>
+            <label>Пароль <input type="password" placeholder="Введите пароль" required /></label>
+            <button class="btn btn-primary btn-full" type="submit">Войти</button>
+          </form>
+          <button class="link-btn" type="button" data-screen="register">Нет аккаунта? Зарегистрироваться</button>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-register">
+        <div class="card auth-card">
+          <h2>Регистрация</h2>
+          <p>Создайте аккаунт для использования GeekChat.</p>
+          <form id="registerForm" class="form">
+            <label>Имя <input type="text" placeholder="Ваше имя" required /></label>
+            <label>Email <input type="email" placeholder="you@example.com" required /></label>
+            <label>Пароль <input type="password" placeholder="Придумайте пароль" required /></label>
+            <button class="btn btn-primary btn-full" type="submit">Зарегистрироваться</button>
+          </form>
+          <button class="link-btn" type="button" data-screen="login">Уже есть аккаунт? Войти</button>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-join">
+        <div class="card auth-card">
+          <h2>Присоединиться</h2>
+          <p>Введите код встречи или ссылку-приглашение.</p>
+          <form id="joinForm" class="form">
+            <label>Код встречи <input id="roomCodeInput" type="text" placeholder="Например: GEEK-1234" required /></label>
+            <button class="btn btn-primary btn-full" type="submit">Подключиться</button>
+          </form>
+          <button class="link-btn" type="button" data-screen="home">Вернуться на главную</button>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-creating-room">
+        <div class="status-card">
+          <div class="loader"></div>
+          <h2>Создаём встречу</h2>
+          <p>Подготавливаем комнату и настраиваем подключение.</p>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-connecting">
+        <div class="status-card">
+          <div class="loader"></div>
+          <h2>Подключаемся</h2>
+          <p>Проверяем комнату и готовим ваше подключение.</p>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-organizer">
+        <div class="card room-card">
+          <div class="room-top">
+            <div>
+              <div class="label">Вы организатор</div>
+              <h2>Встреча создана</h2>
+              <p>Отправьте код участнику, чтобы он смог подключиться.</p>
+            </div>
+            <div class="room-code" id="organizerRoomCode">GEEK-0000</div>
+          </div>
+          <div class="invite-box">
+            <span id="inviteLink">https://geekchat.local/room/GEEK-0000</span>
+            <button class="btn btn-secondary" type="button" id="copyInviteBtn">Копировать</button>
+          </div>
+          <div class="preview-grid">
+            <div class="video-tile local"><div class="avatar">Вы</div><div class="tile-name">Организатор</div></div>
+            <div class="video-tile waiting"><div class="pulse-dot"></div><div class="tile-name">Ожидание участника</div></div>
+          </div>
+          <div class="room-actions">
+            <button class="btn btn-primary" type="button" id="startCallBtn">Начать встречу</button>
+            <button class="btn btn-danger" type="button" data-screen="ended-by-organizer">Завершить</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-guest-setup">
+        <div class="card setup-card">
+          <div class="label">Подготовка к встрече</div>
+          <h2>Настройте подключение</h2>
+          <p>Проверьте камеру и микрофон перед входом в комнату.</p>
+          <div class="video-preview"><div class="avatar big">Вы</div><span>Предпросмотр камеры</span></div>
+          <div class="setup-controls">
+            <button class="call-btn active" type="button" id="micToggleBtn">🎙</button>
+            <button class="call-btn active" type="button" id="camToggleBtn">📷</button>
+          </div>
+          <button class="btn btn-primary btn-full" type="button" id="guestJoinCallBtn">Войти во встречу</button>
+          <button class="link-btn" type="button" data-screen="home">Отмена</button>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-active-call">
+        <div class="call-layout">
+          <div class="call-header">
+            <div>
+              <div class="label">Активная встреча</div>
+              <h2 id="activeRoomTitle">GeekChat Meeting</h2>
+            </div>
+            <div class="call-timer" id="callTimer">00:00</div>
+          </div>
+          <div class="call-grid">
+            <div class="video-tile call-tile"><div class="avatar big">Вы</div><div class="tile-name">Вы</div></div>
+            <div class="video-tile call-tile"><div class="avatar big guest">Г</div><div class="tile-name">Гость</div></div>
+          </div>
+          <div class="call-controls">
+            <button class="call-btn active" type="button" id="callMicBtn">🎙</button>
+            <button class="call-btn active" type="button" id="callCamBtn">📷</button>
+            <button class="call-btn" type="button" id="chatBtn">💬</button>
+            <button class="call-btn danger" type="button" id="leaveCallBtn">✕</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-user-left">
+        <div class="status-card">
+          <div class="status-icon">👋</div>
+          <h2>Вы покинули встречу</h2>
+          <p>Вы можете вернуться на главную страницу или создать новую встречу.</p>
+          <div class="status-actions">
+            <button class="btn btn-primary" type="button" data-screen="home">На главную</button>
+            <button class="btn btn-secondary" type="button" id="createRoomBtnFromLeft">Создать новую</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-ended-by-organizer">
+        <div class="status-card">
+          <div class="status-icon success">✓</div>
+          <h2>Встреча завершена</h2>
+          <p>Организатор завершил видеовстречу для всех участников.</p>
+          <button class="btn btn-primary" type="button" data-screen="home">Вернуться на главную</button>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-invalid-room">
+        <div class="status-card">
+          <div class="status-icon error">!</div>
+          <h2>Не удалось открыть встречу</h2>
+          <p>Комната не найдена, ссылка устарела или код введён неверно.</p>
+          <div class="status-actions">
+            <button class="btn btn-primary" type="button" data-screen="join">Попробовать снова</button>
+            <button class="btn btn-secondary" type="button" data-screen="home">На главную</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <div class="toast" id="toast">Скопировано</div>
+
+  <script src="script.js"></script>
+</body>
 </html>

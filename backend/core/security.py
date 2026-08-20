@@ -26,7 +26,7 @@ class JwtToken:
         if expires_delta:
             expire = datetime.now(timezone.utc) + expires_delta
         else:
-            expire = datetime.now(timezone.utc) + timedelta(minutes=int(s.ACCESS_TOKEN_EXPIRE_MINUTES))
+            expire = datetime.now(timezone.utc) + timedelta(minutes=s.ACCESS_TOKEN_EXPIRE_MINUTES)
 
         print('Creating access token !!!')
 
