@@ -13,15 +13,15 @@ logger = SystemLoggingEntity()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await logger.create_log_line('CODE_1001', LogLevel.INFO, SystemState.CODE_1001)
+    await logger.create_log_line(SystemState.CODE_1001, LogLevel.INFO)
     await init_db()
-    await logger.create_log_line('CODE_1003', LogLevel.INFO, SystemState.CODE_1003)
+    await logger.create_log_line(SystemState.CODE_1003, LogLevel.INFO)
 
     yield
 
-    await logger.create_log_line('CODE_1002', LogLevel.INFO, SystemState.CODE_1002)
+    await logger.create_log_line(SystemState.CODE_1002, LogLevel.INFO)
     await engine.dispose()
-    await logger.create_log_line('CODE_1004', LogLevel.INFO, SystemState.CODE_1004)
+    await logger.create_log_line(SystemState.CODE_1004, LogLevel.INFO)
 
 
 app = FastAPI(title=s.API_TITLE, version=s.API_VERSION, lifespan=lifespan)
