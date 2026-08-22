@@ -25,13 +25,13 @@ class BaseLoggingEntity(ABC):
 
     @staticmethod
     async def create_log_line(
-            description: str,
+            internal_code: str,
             log_level: str,
-            comment: Optional[str] = 'None',
+            description: Optional[str] = 'None',
             web_code: Optional[str] = 'not required'
     ):
 
-        message = f'{description} - {log_level.upper()} - {comment} - web_code: {web_code}'
+        message = f'{internal_code} - {log_level.upper()} - {description} - web_code: {web_code}'
 
         match log_level.upper():
             case l.INFO:
