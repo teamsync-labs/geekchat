@@ -1,0 +1,21 @@
+name: SAST
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  semgrep:
+    name: Semgrep (backend + frontend)
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Semgrep
+        run: semgrep ci --config=auto
+        env:
+          # Опционально: токен для дашборда semgrep.dev (Settings → Secrets → Actions).
+          # Без него шаг всё равно отработает, просто без централизованного дашборда.
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
