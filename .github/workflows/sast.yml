@@ -17,6 +17,4 @@ jobs:
       - name: Run Semgrep
         run: semgrep ci --config=auto
         env:
-          # Опционально: токен для дашборда semgrep.dev (Settings → Secrets → Actions).
-          # Без него шаг всё равно отработает, просто без централизованного дашборда.
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
