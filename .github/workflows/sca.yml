@@ -1,0 +1,36 @@
+name: SCA
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  trivy:
+    name: Trivy dependency scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: 'CRITICAL,HIGH'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+      - name: Upload results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+      - name: Fail on CRITICAL/HIGH findings
+        run: |
+          COUNT=$(jq '[.runs[].results[]] | length' trivy-results.sarif)
+          echo "Найдено находок (CRITICAL/HIGH): $COUNT"
+          if [ "$COUNT" -gt 0 ]; then
+            echo "::error::Обнаружены уязвимости CRITICAL/HIGH — подробности в вкладке Security → Code scanning."
+            exit 1
+          fi
