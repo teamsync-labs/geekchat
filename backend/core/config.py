@@ -14,7 +14,6 @@ class Settings(BaseSettings):
     API_VERSION: str = '1.0.0'
 
     BASE_URL: str | None = os.getenv('BASE_URL')
-
     DATABASE_URL: str | None = os.getenv('DATABASE_URL')
 
     # JWT_SECRET — обязательно в prod (GitHub Secret → compose .env).

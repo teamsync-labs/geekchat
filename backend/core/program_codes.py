@@ -1,4 +1,4 @@
-# 'program_codes.py' - глобальные ошибки приложения.
+# 'program_codes.py' - глобальные коды приложения.
 
 class UserState:
     CODE_5001 = 'USER_ALREADY_EXISTS'

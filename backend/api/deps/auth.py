@@ -1,3 +1,4 @@
+# 'auth.py' - получение валидного пользователя по действительному токену.
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
