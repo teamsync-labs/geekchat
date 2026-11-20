@@ -16,3 +16,17 @@ class WebsocketState:
     CODE_7001 = 'SESSIONS_LIMIT'
     CODE_7002 = 'CONNECTION_DENIED'
     CODE_7003 = 'PEER_IS_NOT_CONNECTED_YET'
+
+
+class LogLevel:
+    INFO = 'INFO'
+    WARNING = 'WARNING'
+    ERROR = 'ERROR'
+    CRITICAL = 'CRITICAL'
+
+
+class SystemState:
+    CODE_1001 = 'APP_START'
+    CODE_1002 = 'APP_SHUTDOWN'
+    CODE_1003 = 'DB_INIT'
+    CODE_1004 = 'DB_CLOSED'
