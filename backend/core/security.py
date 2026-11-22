@@ -4,6 +4,8 @@ from jwt import encode, decode, DecodeError, ExpiredSignatureError, InvalidToken
 from datetime import datetime, timedelta, timezone
 from core.config import settings as s
 from typing import Optional
+from log_system.logger_entities import user_logger as ul
+from core.program_codes import UserState, LogLevel
 
 
 class UserPassword:
@@ -20,7 +22,6 @@ class UserPassword:
 
 
 class JwtToken:
-# Где функция print, там будет логирование.
     @staticmethod
     def create_access_token(user_id, expires_delta: Optional[timedelta] = None):
         if expires_delta:
@@ -28,15 +29,13 @@ class JwtToken:
         else:
             expire = datetime.now(timezone.utc) + timedelta(minutes=s.ACCESS_TOKEN_EXPIRE_MINUTES)
 
-        print('Creating access token !!!')
-
         token = encode(
             payload={'user_id': user_id, 'exp': expire, 'type': 'access'},
             key=s.JWT_SECRET,
             algorithm=s.JWT_ALGORITHM
         )
 
-        print(f'Access Token is created for {user_id}')
+        ul.create_log_line(UserState.CODE_5010, LogLevel.INFO, f'user-id: {user_id}')
 
         return token
 
@@ -46,23 +45,26 @@ class JwtToken:
             payload = decode(token, s.JWT_SECRET, algorithms=[s.JWT_ALGORITHM])
 
             if payload.get('type') != token_type:
-                print(f'Invalid token type: reference {token_type}, current {payload.get('type')}')
+                ul.create_log_line(UserState.CODE_5020, LogLevel.ERROR,
+                                   f'reference {token_type}, current {payload.get('type')}')
 
-                raise ValueError('Invalid token type')  # error codes ???
+                raise ValueError
 
             user_id = payload.get('user_id')
 
             if not user_id:
-                raise ValueError('Token is not contains user_id')
+                ul.create_log_line(UserState.CODE_5021, LogLevel.ERROR)
+
+                raise ValueError
 
             return { 'user_id': user_id }
 
         except ExpiredSignatureError:
-            print('Token has expired')
+            ul.create_log_line(UserState.CODE_5022, LogLevel.ERROR)
 
-            raise ValueError('Token has expired')
+            raise ValueError
 
         except InvalidTokenError as e:
-            print(f'False token: {e}')
+            ul.create_log_line(UserState.CODE_5023, LogLevel.ERROR, f'{e}')
 
-            raise ValueError('False token')
+            raise ValueError

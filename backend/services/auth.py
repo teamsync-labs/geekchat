@@ -5,8 +5,10 @@ from datetime import datetime, timezone
 from models.user import User
 from schemas.auth import UserRegister, UserLogin
 from core.security import UserPassword, JwtToken
+from log_system.logger_entities import user_logger as ul
+from core.program_codes import UserState, LogLevel
 
-# Logging here !!
+
 class AuthService:
     def __init__(self, db: AsyncSession):
         self.db = db
@@ -21,9 +23,9 @@ class AuthService:
         try:
             payload = JwtToken.verify_token(token, token_type='access')
         except ValueError as e:
-            print(f'Check token error: {e}')
+            ul.create_log_line(UserState.CODE_5024, LogLevel.ERROR, f'{e}')
 
-            raise ValueError(str(e))
+            raise ValueError
 
         user_id = payload.get('user_id')
 
@@ -32,14 +34,14 @@ class AuthService:
         user = result.scalars().first()
 
         if not user:
-            print(f'User not found: {user_id}')
+            ul.create_log_line(UserState.CODE_5202, LogLevel.ERROR, f'user-id: {user_id}')
 
-            raise ValueError('User not found')
+            raise ValueError
 
         if not user.is_active:
-            print(f'Account deactivated: {user.user_name}')
+            ul.create_log_line(UserState.CODE_5203, LogLevel.ERROR, f'user-name: {user.user_name}')
 
-            raise ValueError('Account deactivated')
+            raise ValueError
 
         return user
 
@@ -49,19 +51,19 @@ class AuthService:
         user = result.scalars().first()
 
         if user is None:
-            print(f'Login attempt by a non-existent email: {data.email}')   # error logging !!
+            ul.create_log_line(UserState.CODE_5204, LogLevel.ERROR, f'{data.email}')
 
-            raise ValueError('False email or password')  # error codes ??
+            raise ValueError
 
         if not user.is_active:
-            print(f'Login attempt by a deactivated user: {user.user_name}')
+            ul.create_log_line(UserState.CODE_5205, LogLevel.ERROR, f'user-name: {user.user_name}')
 
-            raise ValueError('Account deactivated')
+            raise ValueError
 
         if not UserPassword.verify_password(data.password, user.password_hash):
-            print(f'Invalid password for: {user.user_name}')
+            ul.create_log_line(UserState.CODE_5206, LogLevel.ERROR, f'user-name: {user.user_name}')
 
-            raise ValueError('False email or password')
+            raise ValueError
 
         user.last_login = datetime.now(timezone.utc)
         await self.db.commit()
@@ -69,7 +71,7 @@ class AuthService:
         access_token = JwtToken.create_access_token(user.user_id)
         # refresh token create
 
-        print(f'User login: {user.user_name}')
+        ul.create_log_line(UserState.CODE_5101, LogLevel.INFO, f'user-name: {user.user_name}')
 
         return access_token     # > refresh_token
 

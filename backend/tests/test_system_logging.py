@@ -1,11 +1,11 @@
 import pytest
 from core.program_codes import LogLevel, SystemState
-from log_system.log_entities import SystemLoggingEntity
+from log_system.logger_entities import SystemLoggerEntity
 
 
 @pytest.mark.asyncio
 async def test_create_log_line_valid_args(caplog):
-    logger = SystemLoggingEntity()
+    logger = SystemLoggerEntity()
     with caplog.at_level('INFO'):
         await logger.create_log_line(
             SystemState.CODE_1003,

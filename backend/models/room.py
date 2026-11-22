@@ -17,7 +17,3 @@ class Room(Base):
 
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     expires_at = Column(DateTime(timezone=True), nullable=False)
-
-    def __repr__(self):
-        return (f"Room(id={self.room_id}, creator_id={self.creator_id}, status={self.status}, "
-                f"create_time={self.created_at}, expire_time={self.expires_at})")

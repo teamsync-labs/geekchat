@@ -52,7 +52,7 @@ class ConnectionManager:
 
             if user_id != ConnectionManager.GUEST_ID:
                 if creator_id != user_id:
-                    return False, us.CODE_5002, None
+                    return False, us.CODE_5201, None
             else:
                 if room_id not in self.connections:
                     return False, ws.CODE_7002, None

@@ -103,7 +103,7 @@ def test_stranger_user_id_rejected_as_not_owner(ws_client, mock_room_service, mo
             ws_con.receive_json()
 
     assert exc_info.value.code == 1008
-    assert exc_info.value.reason == us.CODE_5002
+    assert exc_info.value.reason == us.CODE_5201
 
 # Тест на запрет создания сессии подключения, когда исчерпан лимит, равный количеству пользователей в системе.
 def test_global_rooms_limit_reached_rejects_new_room(ws_client, mock_room_service, mock_auth_service):

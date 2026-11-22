@@ -1,3 +1,4 @@
+# 'base_logger_entity.py' - базовый класс для сущностей логгеров.
 from typing import Optional
 import logging
 from abc import ABC, abstractmethod
@@ -5,7 +6,7 @@ from pathlib import Path
 from core.program_codes import LogLevel as l
 
 
-class BaseLoggingEntity(ABC):
+class BaseLoggerEntity(ABC):
     def __init__(self) -> None:
         log_dir = Path('logs')
         log_file_path = log_dir / 'program_log.log'
@@ -27,8 +28,8 @@ class BaseLoggingEntity(ABC):
     async def create_log_line(
             internal_code: str,
             log_level: str,
-            description: Optional[str] = 'None',
-            web_code: Optional[str] = 'not required'
+            description: Optional[str] = 'none',
+            web_code: Optional[str] = 'none'
     ):
 
         message = f'{internal_code} - {log_level.upper()} - {description} - web_code: {web_code}'

@@ -21,7 +21,3 @@ class User(Base):
                         onupdate=func.now(), nullable=False)
 
     last_login = Column(DateTime(timezone=True), nullable=True)
-
-    def __repr__(self):
-        return (f"<User(id={self.user_id}, username={self.user_name}, e-mail={self.email}, "
-                f"secure_hash={self.password_hash}, created_at={self.created_at})>")

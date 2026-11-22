@@ -12,5 +12,3 @@ AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_co
 async def init_db():
     async with engine.begin() as connect:
         await connect.run_sync(Base.metadata.create_all)
-
-    print('Database relations created and checks !')
