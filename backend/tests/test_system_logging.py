@@ -1,16 +1,17 @@
-import pytest
 from core.program_codes import LogLevel, SystemState
 from log_system.logger_entities import SystemLoggerEntity
+import logging
 
 
-@pytest.mark.asyncio
-async def test_create_log_line_valid_args(caplog):
+def test_create_log_line_valid_args(caplog, tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+
     logger = SystemLoggerEntity()
-    with caplog.at_level('INFO'):
-        await logger.create_log_line(
+    with caplog.at_level(logging.INFO):
+        logger.create_log_line(
             SystemState.CODE_1003,
-            LogLevel.INFO
+            LogLevel.INFO,
         )
-    assert len(caplog.records) == 1
-    assert caplog.messages[0] == "DB_INIT - INFO - None - web_code: not required"
 
+    assert len(caplog.records) == 1
+    assert caplog.messages[0] == 'DB_INIT - INFO - none - web_code: none'

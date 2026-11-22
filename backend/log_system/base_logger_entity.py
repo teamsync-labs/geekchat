@@ -25,7 +25,7 @@ class BaseLoggerEntity(ABC):
         pass
 
     @staticmethod
-    async def create_log_line(
+    def create_log_line(
             internal_code: str,
             log_level: str,
             description: Optional[str] = 'none',
@@ -43,3 +43,5 @@ class BaseLoggerEntity(ABC):
                 logging.error(message)
             case l.CRITICAL:
                 logging.critical(message)
+            case _:
+                logging.error(f'Unknown log level "{log_level}": {message}')

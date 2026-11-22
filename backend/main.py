@@ -12,15 +12,15 @@ from log_system.logger_entities import system_logger as sl
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await sl.create_log_line(SystemState.CODE_1001, LogLevel.INFO)
+    sl.create_log_line(SystemState.CODE_1001, LogLevel.INFO)
     await init_db()
-    await sl.create_log_line(SystemState.CODE_1003, LogLevel.INFO)
+    sl.create_log_line(SystemState.CODE_1003, LogLevel.INFO)
 
     yield
 
-    await sl.create_log_line(SystemState.CODE_1002, LogLevel.INFO)
+    sl.create_log_line(SystemState.CODE_1002, LogLevel.INFO)
     await engine.dispose()
-    await sl.create_log_line(SystemState.CODE_1004, LogLevel.INFO)
+    sl.create_log_line(SystemState.CODE_1004, LogLevel.INFO)
 
 
 app = FastAPI(title=s.API_TITLE, version=s.API_VERSION, lifespan=lifespan)

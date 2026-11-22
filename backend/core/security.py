@@ -1,6 +1,6 @@
 # 'security.py' - сущности безопасности.
 import bcrypt
-from jwt import encode, decode, DecodeError, ExpiredSignatureError, InvalidTokenError
+from jwt import encode, decode, ExpiredSignatureError, InvalidTokenError
 from datetime import datetime, timedelta, timezone
 from core.config import settings as s
 from typing import Optional
