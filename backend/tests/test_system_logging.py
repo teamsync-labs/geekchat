@@ -1,3 +1,4 @@
+# 'test_system_logging.py' - тест на покрытие BaseLoggerEntity.create_log_line.
 from core.program_codes import LogLevel, SystemState
 from log_system.logger_entities import SystemLoggerEntity
 import logging

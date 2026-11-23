@@ -48,23 +48,23 @@ class JwtToken:
                 ul.create_log_line(UserState.CODE_5020, LogLevel.ERROR,
                                    f'reference {token_type}, current {payload.get('type')}')
 
-                raise ValueError
+                raise ValueError(UserState.CODE_5020)
 
             user_id = payload.get('user_id')
 
             if not user_id:
                 ul.create_log_line(UserState.CODE_5021, LogLevel.ERROR)
 
-                raise ValueError
+                raise ValueError(UserState.CODE_5021)
 
             return { 'user_id': user_id }
 
         except ExpiredSignatureError:
             ul.create_log_line(UserState.CODE_5022, LogLevel.ERROR)
 
-            raise ValueError
+            raise ValueError(UserState.CODE_5022)
 
         except InvalidTokenError as e:
             ul.create_log_line(UserState.CODE_5023, LogLevel.ERROR, f'{e}')
 
-            raise ValueError
+            raise ValueError(UserState.CODE_5023)

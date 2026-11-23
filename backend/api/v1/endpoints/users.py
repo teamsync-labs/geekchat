@@ -16,29 +16,21 @@ router = APIRouter()
 async def register(data: UserRegister, service: AuthService = Depends(get_auth_service)):
     try:
         user = await service.register(data)
-
-        if user is not None:
-            ul.create_log_line(UserState.CODE_5100, LogLevel.INFO, f'user-id: {user.user_id}', status.HTTP_201_CREATED)
-
-            access_token = JwtToken.create_access_token(user.user_id)
-            # create refresh
-            return {
-                'user': user,
-                'access_token': access_token,
-                # refresh
-                'token_type': 'bearer'
-            }
-
-        else:
-            ul.create_log_line(UserState.CODE_5200, LogLevel.WARNING, f'user-id: {user.user_id}',
-                               status.HTTP_400_BAD_REQUEST)
-
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=UserState.CODE_5200)
-
     except Exception as e:
         ul.create_log_line(UserState.CODE_5207, LogLevel.CRITICAL, f'{e}', status.HTTP_500_INTERNAL_SERVER_ERROR)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=UserState.CODE_5207)
 
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    if user is None:
+        ul.create_log_line(UserState.CODE_5200, LogLevel.WARNING, f'user-name: {data.username}', status.HTTP_400_BAD_REQUEST)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=UserState.CODE_5200)
+
+    ul.create_log_line(UserState.CODE_5100, LogLevel.INFO, f'user-id: {user.user_id}', status.HTTP_201_CREATED)
+    return {
+        'user': user,
+        'access_token': JwtToken.create_access_token(user.user_id),
+        # refresh
+        'token_type': 'bearer'
+    }
 
 @router.post('/login', response_model=TokenResponse)
 async def login(data: UserLogin, service: AuthService = Depends(get_auth_service)):
@@ -51,12 +43,12 @@ async def login(data: UserLogin, service: AuthService = Depends(get_auth_service
         }
 
     except ValueError as e:
-        ul.create_log_line(UserState.CODE_5208, LogLevel.ERROR, f'{e}', status.HTTP_401_UNAUTHORIZED)
+        ul.create_log_line(UserState.CODE_5207, LogLevel.ERROR, f'{e}', status.HTTP_401_UNAUTHORIZED)
 
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
 
     except Exception as e:
-        ul.create_log_line(UserState.CODE_5208, LogLevel.CRITICAL, f'{e}', status.HTTP_500_INTERNAL_SERVER_ERROR)
+        ul.create_log_line(UserState.CODE_5207, LogLevel.CRITICAL, f'{e}', status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 

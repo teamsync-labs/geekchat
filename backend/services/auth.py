@@ -25,7 +25,7 @@ class AuthService:
         except ValueError as e:
             ul.create_log_line(UserState.CODE_5024, LogLevel.ERROR, f'{e}')
 
-            raise ValueError
+            raise ValueError(UserState.CODE_5024)
 
         user_id = payload.get('user_id')
 
@@ -36,12 +36,12 @@ class AuthService:
         if not user:
             ul.create_log_line(UserState.CODE_5202, LogLevel.ERROR, f'user-id: {user_id}')
 
-            raise ValueError
+            raise ValueError(UserState.CODE_5202)
 
         if not user.is_active:
             ul.create_log_line(UserState.CODE_5203, LogLevel.ERROR, f'user-name: {user.user_name}')
 
-            raise ValueError
+            raise ValueError(UserState.CODE_5203)
 
         return user
 
@@ -51,19 +51,19 @@ class AuthService:
         user = result.scalars().first()
 
         if user is None:
-            ul.create_log_line(UserState.CODE_5204, LogLevel.ERROR, f'{data.email}')
+            ul.create_log_line(UserState.CODE_5204, LogLevel.ERROR)
 
-            raise ValueError
+            raise ValueError(UserState.CODE_5204)
 
         if not user.is_active:
             ul.create_log_line(UserState.CODE_5205, LogLevel.ERROR, f'user-name: {user.user_name}')
 
-            raise ValueError
+            raise ValueError(UserState.CODE_5205)
 
         if not UserPassword.verify_password(data.password, user.password_hash):
             ul.create_log_line(UserState.CODE_5206, LogLevel.ERROR, f'user-name: {user.user_name}')
 
-            raise ValueError
+            raise ValueError(UserState.CODE_5206)
 
         user.last_login = datetime.now(timezone.utc)
         await self.db.commit()
